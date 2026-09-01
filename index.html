@@ -642,7 +642,7 @@ function blank(){
     league:'Draft Room', rounds:ROSTER, clockSec:90,
     teams:Array.from({length:10},(_,i)=>({name:'Team '+(i+1),owner:''})),
     order:[0,1,2,3,4,5,6,7,8,9],
-    picks:[], claims:{}, started:false, poolText:null, openPick:false
+    picks:[], claims:{}, started:false, poolText:null, openPick:true
   };
 }
 
@@ -702,7 +702,11 @@ function posRun(){
 function myDevice(){
   let d=get(LS+'_dev'); if(!d){ d=uid(); put(LS+'_dev',d); } return d;
 }
+/* Which team's roster this device wants to watch. Purely a local
+   preference now: nobody is required to identify themselves. */
 function myTeam(){
+  const v=get(LS+'_myteam');
+  if(v!==null && v!=='' && S.teams[+v]) return +v;
   const d=myDevice();
   for(const k in (S.claims||{})) if(S.claims[k] && S.claims[k].dev===d) return parseInt(k,10);
   return null;
@@ -819,7 +823,7 @@ function applyRemote(v){
   S.rounds   = m.rounds || S.rounds;
   S.clockSec = (m.clockSec===undefined? S.clockSec : m.clockSec);
   S.started  = !!m.started;
-  S.openPick = !!m.openPick;
+  S.openPick = (m.openPick===undefined) ? true : !!m.openPick;
   if(v.teams) S.teams = v.teams.map(t=>({name:t.name||'Team',owner:t.owner||''}));
   if(v.order) S.order = v.order.slice();
   S.claims = v.claims || {};
@@ -838,12 +842,6 @@ function applyRemote(v){
   }
   saveLocal();
   render();
-  /* Show the picker as soon as we actually have the team names,
-     not on a timer that a slow connection would beat. */
-  if(Sync.on && !window.__gateDone && myTeam()===null && S.teams.length){
-    window.__gateDone = true;
-    welcomeGate();
-  }
 }
 
 function paintSync(){
@@ -1277,29 +1275,23 @@ function setupView(){
       '<p class="h">'+(cm?'You are the commissioner, so you can set the order, undo picks and fix mistakes. ':'')+
       'Everyone on this link sees picks the moment they happen.</p>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-      (mt===null?'<button class="btn key" id="bWho">Pick my team</button>':'')+
       '<button class="btn" id="bInvite">Copy the link</button>'+
       (cm?'':'<button class="btn" id="bTakeover">Take over as commissioner</button>')+
       '<button class="btn" id="bLeave">Disconnect</button></div>'+
-      (cm?'<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="bOpen" '+(S.openPick?'checked':'')+' style="width:auto;margin-right:7px">Let anyone pick for any team</label>'+
-      '<span style="font-size:12px;color:var(--faint)">Turn this on if someone drops off and you need to pick for them.</span></div>':'')+
+      (cm?'<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="bLock" '+(S.openPick?'':'checked')+' style="width:auto;margin-right:7px">Only let each manager pick for their own team</label>'+
+      '<span style="font-size:12px;color:var(--faint)">Off by default, so whoever is nearest the keyboard can enter any pick. Turn it on and everyone has to choose their team below before they can draft.</span></div>':'')+
       '</div>'
     : '<div class="card sec"><h2>Draft from separate devices</h2>'+
       '<p class="h">This board is only on this device right now. To let all ten managers pick from their own laptops and phones, connect a free Firebase database once and paste the details into the ROOM block at the top of the file. After that everyone just opens the link.</p>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn key" id="bCreate">Set up a room now</button>'+
       '<button class="btn" id="bJoin">Join with a code</button></div></div>';
 
-  const claimBlock = Sync.on ? '<div class="card sec"><h2>Who is who</h2>'+
-    '<p class="h">Claim your team so the board knows whose turn it is. One team per device.</p>'+
-    '<div>'+S.order.map((tid,i)=>{
-      const c=(S.claims||{})[tid];
-      return '<div class="trow"><span class="no">'+(i+1)+'</span>'+
-        '<span style="font-weight:600">'+esc(S.teams[tid].name)+'</span>'+
-        '<span style="font-size:12px;color:var(--dim)">'+(c?esc(c.who||'claimed'):'unclaimed')+'</span>'+
-        '<span>'+(mt===tid
-          ? '<button class="btn sm" data-unclaim="'+tid+'">Release</button>'
-          : (c?'':'<button class="btn sm key" data-claim="'+tid+'">This is me</button>'))+'</span><span></span></div>';
-    }).join('')+'</div></div>' : '';
+  const claimBlock = Sync.on ? '<div class="card sec"><h2>Your team</h2>'+
+    '<p class="h">Optional. Pick yours and the sidebar tracks your roster, bye weeks and tier pressure while you draft. It does not stop anyone else from picking.</p>'+
+    '<div style="max-width:300px"><select id="whoSel">'+
+    '<option value="">No team, just following along</option>'+
+    S.order.map((tid,i)=>'<option value="'+tid+'" '+(mt===tid?'selected':'')+'>'+esc(S.teams[tid].name)+' (slot '+(i+1)+')</option>').join('')+
+    '</select></div></div>' : '';
 
   return '<div class="setup">'+syncBlock+claimBlock+
     '<div class="card sec"><h2>League</h2><p class="h">These names show on the board and in the export.</p>'+
@@ -1537,30 +1529,6 @@ function putFocus(f){
   el.focus();
   try{ el.setSelectionRange(f.s,f.e); }catch(e){}
 }
-/* Someone opening the link for the first time should see one question,
-   not a setup form. Which of these teams is yours. */
-function welcomeGate(){
-  if(!Sync.on || myTeam()!==null) return;
-  if($('#ov').innerHTML.indexOf('data-pick-team')>=0) return;
-  const free = S.order.map((tid,i)=>({tid:tid,slot:i+1})).filter(o=>!(S.claims||{})[o.tid]);
-  const taken = S.order.length - free.length;
-  modal('<h3>Welcome to '+esc(S.league)+'</h3>'+
-    '<p>Pick your team to get started. '+(taken?taken+' already claimed.':'')+'</p>'+
-    (free.length
-      ? '<div style="display:flex;flex-direction:column;gap:6px">'+free.map(o=>
-          '<button class="btn" data-pick-team="'+o.tid+'" style="justify-content:space-between;width:100%">'+
-          '<span>'+esc(S.teams[o.tid].name)+'</span>'+
-          '<span style="color:var(--faint);font-size:12px">slot '+o.slot+'</span></button>').join('')+'</div>'
-      : '<p style="color:var(--dim)">Every team is claimed. If one of them is yours, release it on the Setup tab from the device that claimed it.</p>')+
-    '<div class="row"><button class="btn gh" data-x>Just watching</button></div>');
-  $$('[data-pick-team]').forEach(b=>b.onclick=()=>{
-    const t=+b.dataset.pickTeam;
-    Sync.setClaim(t,{dev:myDevice(),who:S.teams[t].name});
-    put(LS+'_myteam',String(t));
-    closeM(); toast('You are '+S.teams[t].name);
-  });
-}
-
 function render(){
   const f=keepFocus();
   head();
@@ -1669,7 +1637,6 @@ function bind(){
   const bcr=$('#bCreate'); if(bcr) bcr.onclick=setupRoomModal;
   const bjn=$('#bJoin'); if(bjn) bjn.onclick=joinModal;
   const biv=$('#bInvite'); if(biv) biv.onclick=invite;
-  const bwho=$('#bWho'); if(bwho) bwho.onclick=welcomeGate;
   const bto=$('#bTakeover'); if(bto) bto.onclick=()=>{
     modal('<h3>Take over as commissioner</h3><p>Only do this if you are actually running the draft. It moves the ability to set the order, undo picks and clear the board to this device.</p>'+
       '<div class="row"><button class="btn" data-x>Cancel</button><button class="btn key" id="toGo">Take over</button></div>');
@@ -1681,14 +1648,20 @@ function bind(){
     };
   };
   const blv=$('#bLeave'); if(blv) blv.onclick=()=>{ Sync.leave(); toast('Left the room'); render(); };
-  const bop=$('#bOpen'); if(bop) bop.onchange=e=>{ S.openPick=e.target.checked; if(Sync.on) Sync.pushMeta(); saveLocal(); };
+  const bl=$('#bLock'); if(bl) bl.onchange=e=>{ S.openPick=!e.target.checked; if(Sync.on) Sync.pushMeta(); saveLocal(); render(); };
+  const ws=$('#whoSel'); if(ws) ws.onchange=e=>{
+    const v=e.target.value;
+    if(v===''){ put(LS+'_myteam',''); if(Sync.on) Sync.setClaim(mt,null); }
+    else { put(LS+'_myteam',v); if(Sync.on) Sync.setClaim(+v,{dev:myDevice(),who:S.teams[+v].name}); }
+    render();
+    toast(v===''?'Following along':'Tracking '+S.teams[+v].name);
+  };
   $$('[data-claim]').forEach(b=>b.onclick=()=>{
     const t=+b.dataset.claim;
-    const who=prompt('Your name?','')||'';
-    Sync.setClaim(t,{dev:myDevice(),who:who.slice(0,24)});
     put(LS+'_myteam',String(t));
+    Sync.setClaim(t,{dev:myDevice(),who:S.teams[t].name});
   });
-  $$('[data-unclaim]').forEach(b=>b.onclick=()=>Sync.setClaim(+b.dataset.unclaim,null));
+  $$('[data-unclaim]').forEach(b=>b.onclick=()=>{ put(LS+'_myteam',''); Sync.setClaim(+b.dataset.unclaim,null); });
 }
 function mark(){
   $$('.pr').forEach((r,i)=>r.classList.toggle('sel',i===selIdx));
@@ -1738,7 +1711,7 @@ function boot(){
       const raw=location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/');
       const j=JSON.parse(decodeURIComponent(escape(atob(raw))));
       history.replaceState(null,'',location.pathname);
-      const go=()=>Sync.start(j.c,j.r,false,err=>{ if(err){toast(err,1);return;} toast('Connected to room '+j.r); render(); setTimeout(welcomeGate,600); });
+      const go=()=>Sync.start(j.c,j.r,false,err=>{ if(err){toast(err,1);return;} toast('Connected to room '+j.r); render(); });
       if(Sync.ready()) go(); else setTimeout(go,1200);
     }catch(e){}
   } else {
