@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
+:root,[data-theme="dark"]{
   --bg:#070808;
   --p1:#0F1112;
   --p2:#16191B;
@@ -19,17 +19,37 @@
   --tx:#EDEFF0;
   --dim:#8A9196;
   --faint:#575E63;
+  --chip:#070808;
+  --shadow:rgba(0,0,0,.6);
+  --scrim:rgba(3,4,4,.8);
 
-  /* tier ramp — the only place color runs hot */
   --t1:#FF5C5C; --t2:#FF9F43; --t3:#FFD93D; --t4:#6BE38A;
   --t5:#4EA8FF; --t6:#A78BFA; --t7:#7C8790;
-
-  /* position edges */
   --QB:#FF7A5C; --RB:#4ADE80; --WR:#60A5FA; --TE:#C084FC; --K:#FBBF24; --DST:#94A3B8;
-
   --live:#FF5C5C;
   --ok:#4ADE80;
+}
+[data-theme="light"]{
+  --bg:#F4F6F7;
+  --p1:#FFFFFF;
+  --p2:#EFF2F4;
+  --p3:#E2E7EA;
+  --line:#D6DCE0;
+  --line-2:#E8ECEF;
+  --tx:#101416;
+  --dim:#5C666D;
+  --faint:#8A959C;
+  --chip:#FFFFFF;
+  --shadow:rgba(16,20,22,.16);
+  --scrim:rgba(40,48,52,.45);
 
+  --t1:#D93A3A; --t2:#C2661A; --t3:#9A7B08; --t4:#1E9B52;
+  --t5:#1F6FD0; --t6:#7A4FD6; --t7:#69747B;
+  --QB:#D9522F; --RB:#1E9B52; --WR:#1F6FD0; --TE:#7A4FD6; --K:#B07C0A; --DST:#5F6B75;
+  --live:#D93A3A;
+  --ok:#1E9B52;
+}
+:root{
   --disp:'Bricolage Grotesque',system-ui,sans-serif;
   --ui:'Inter',system-ui,sans-serif;
   --r:7px;
@@ -37,7 +57,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
-  background:var(--bg);color:var(--tx);font-family:var(--ui);font-size:14px;line-height:1.45;
+  background:var(--bg);color:var(--tx);font-family:var(--ui);font-size:14px;line-height:1.45;transition:background .15s,color .15s;
   font-feature-settings:'tnum' 1,'cv05' 1;-webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
@@ -56,8 +76,8 @@ h1,h2,h3,h4{font-family:var(--disp);font-weight:700;letter-spacing:-.01em;line-h
 }
 .btn:hover{background:var(--p3);border-color:var(--faint)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn.key{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
-.btn.key:hover{background:#fff}
+.btn.key{background:var(--tx);color:var(--p1);border-color:var(--tx);font-weight:600}
+.btn.key:hover{opacity:.85}
 .btn.warn:hover{border-color:var(--live);color:var(--live)}
 .btn.sm{padding:5px 10px;font-size:12px}
 .btn.gh{background:transparent}
@@ -69,14 +89,14 @@ textarea{font-family:var(--ui);resize:vertical}
 label.fl{display:block;font-size:12px;color:var(--dim);margin-bottom:5px}
 
 .pos{
-  font-size:10.5px;font-weight:700;padding:2px 5px;border-radius:3px;color:var(--bg);
+  font-size:10.5px;font-weight:700;padding:2px 5px;border-radius:3px;color:var(--chip);
   display:inline-block;line-height:1.35;letter-spacing:.01em;
 }
 .pos.QB{background:var(--QB)}.pos.RB{background:var(--RB)}.pos.WR{background:var(--WR)}
 .pos.TE{background:var(--TE)}.pos.K{background:var(--K)}.pos.DST{background:var(--DST)}
 
 /* ---------- header ---------- */
-header{position:sticky;top:0;z-index:70;background:rgba(7,8,8,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:70;background:var(--bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .hin{max-width:1580px;margin:0 auto;padding:10px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}
 .mark{min-width:0}
 .mark h1{font-size:21px;font-weight:800;white-space:nowrap}
@@ -133,7 +153,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .fl-row{display:flex;gap:3px;flex-wrap:wrap}
 .fl-row button{font-size:12px;font-weight:500;padding:7px 11px;border-radius:var(--r);border:1px solid var(--line);color:var(--dim)}
 .fl-row button:hover{color:var(--tx)}
-.fl-row button.on{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
+.fl-row button.on{background:var(--tx);color:var(--p1);border-color:var(--tx);font-weight:600}
 
 .pool{max-height:calc(100vh - 262px);overflow-y:auto;border:1px solid var(--line);border-radius:9px;background:var(--p1)}
 .pr{display:grid;grid-template-columns:38px 1fr 44px 58px 46px 30px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line-2);cursor:pointer}
@@ -184,7 +204,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .tb-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 12px}
 .tb-cols{display:flex;gap:3px;flex-wrap:wrap}
 .tb-cols button{font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:var(--r);border:1px solid var(--line);color:var(--dim)}
-.tb-cols button.on{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
+.tb-cols button.on{background:var(--tx);color:var(--p1);border-color:var(--tx);font-weight:600}
 .tiers{display:flex;flex-direction:column;gap:7px}
 .tier{display:grid;grid-template-columns:112px minmax(0,1fr);border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--p1)}
 .tier.over{border-color:var(--tx);background:var(--p2)}
@@ -212,7 +232,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pc.gone .t{text-decoration:line-through;text-decoration-thickness:1.5px}
 .pc.mine{border-color:var(--ok);background:rgba(74,222,128,.09)}
 .pc.drag{opacity:.28}
-.pc.ghost{position:fixed;z-index:500;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.6);cursor:grabbing;border-color:var(--tx)}
+.pc.ghost{position:fixed;z-index:500;pointer-events:none;box-shadow:0 10px 30px var(--shadow);cursor:grabbing;border-color:var(--tx)}
 .tzone .ins{width:2px;height:30px;background:var(--tx);border-radius:2px;flex:none}
 .tzone .none{color:var(--faint);font-size:12px;padding:6px 2px}
 
@@ -274,7 +294,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .prose li{margin-bottom:6px}
 
 /* ---------- modal / toast ---------- */
-.scrim{position:fixed;inset:0;background:rgba(3,4,4,.8);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.scrim{position:fixed;inset:0;background:var(--scrim);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{background:var(--p1);border:1px solid var(--line);border-radius:11px;max-width:490px;width:100%;padding:22px;max-height:88vh;overflow-y:auto}
 .modal h3{font-size:21px;font-weight:800;margin-bottom:6px}
 .modal p{font-size:13px;color:var(--dim);margin-bottom:15px}
@@ -282,7 +302,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pcard{border:1px solid var(--line);border-radius:var(--r);padding:13px;background:var(--p2)}
 .pcard .n{font-family:var(--disp);font-weight:800;font-size:25px;line-height:1.05}
 .pcard .m{font-size:12px;color:var(--dim);margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:300;background:var(--p3);border:1px solid var(--line);border-radius:30px;padding:9px 20px;font-size:13px;box-shadow:0 10px 34px rgba(0,0,0,.6);animation:up .28s ease}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:300;background:var(--p3);border:1px solid var(--line);border-radius:30px;padding:9px 20px;font-size:13px;box-shadow:0 10px 34px var(--shadow);animation:up .28s ease}
 @keyframes up{from{transform:translate(-50%,12px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 .toast.bad{border-color:var(--live);color:var(--live)}
 .stat{padding:14px}
@@ -290,6 +310,42 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .stat .v{font-family:var(--disp);font-weight:800;font-size:31px;line-height:1.05;margin-top:3px}
 .stat .d{font-size:12px;color:var(--dim);margin-top:3px}
 .recap{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:13px}
+
+
+/* ---------- player avatars ---------- */
+.av{
+  width:34px;height:34px;border-radius:50%;flex:none;position:relative;overflow:hidden;
+  background:var(--p3);display:flex;align-items:center;justify-content:center;
+}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av img.logo{object-fit:contain;padding:5px;background:var(--p2)}
+.av .mono{font-family:var(--disp);font-weight:700;font-size:12.5px;color:var(--chip);letter-spacing:.01em}
+.av.sm{width:26px;height:26px}
+.av.sm .mono{font-size:10.5px}
+.av.lg{width:56px;height:56px}
+.av.lg .mono{font-size:20px}
+.av .ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 2px var(--pc,transparent)}
+.pr{grid-template-columns:34px 38px 1fr 44px 58px 46px 30px}
+.pc .av{margin-right:1px}
+.cl .av{position:absolute;right:5px;bottom:5px;width:22px;height:22px;opacity:.9}
+.cl .nm{padding-right:26px}
+
+/* ---------- mock draft ---------- */
+.mockbar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:9px 14px;border:1px solid var(--t5);border-radius:9px;
+  background:color-mix(in srgb,var(--t5) 10%,transparent);margin-top:13px;
+}
+.mockbar .lbl{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--t5)}
+.mockbar .txt{font-size:12.5px;color:var(--dim);flex:1;min-width:150px}
+.thinking{display:inline-flex;gap:3px;align-items:center;margin-left:6px}
+.thinking i{width:4px;height:4px;border-radius:50%;background:var(--t5);animation:th 1s infinite}
+.thinking i:nth-child(2){animation-delay:.15s}
+.thinking i:nth-child(3){animation-delay:.3s}
+@keyframes th{0%,100%{opacity:.25}50%{opacity:1}}
+.gradecard{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--p2);margin-bottom:7px}
+.gradecard .g{font-family:var(--disp);font-weight:800;font-size:27px;text-align:center;line-height:1}
+.themebtn{font-size:15px;line-height:1;padding:7px 10px}
 
 @media(max-width:1120px){
   .dgrid{grid-template-columns:1fr}
@@ -303,7 +359,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
   .mark h1{font-size:18px}
   .otc .nm{font-size:16px;max-width:42vw}
   .tm{font-size:21px;min-width:74px}
-  .pr{grid-template-columns:32px 1fr 42px 48px;gap:8px}
+  .pr{grid-template-columns:30px 30px 1fr 42px 48px;gap:8px}
   .pr .by,.pr .st{display:none}
   .wrap{padding:0 12px 80px}
   .tier{grid-template-columns:88px minmax(0,1fr)}
@@ -334,6 +390,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
     </div>
     <div class="hact">
       <span class="sync" id="syncPill"><span class="d"></span><span id="syncTxt">Local</span></span>
+      <button class="btn sm gh themebtn" id="bTheme" title="Switch between light and dark">◐</button>
       <button class="btn sm gh" id="bClock">Start clock</button>
       <button class="btn sm gh" id="bUndo">Undo</button>
     </div>
@@ -605,6 +662,79 @@ const mem = {};
 function put(k,v){ try{localStorage.setItem(k,v);}catch(e){mem[k]=v;} }
 function get(k){ try{return localStorage.getItem(k);}catch(e){return mem[k]||null;} }
 
+/* ---------- THEME ---------- */
+function theme(){ return get(LS+'_theme') || (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  put(LS+'_theme',t);
+  const b=$('#bTheme'); if(b) b.textContent = t==='dark' ? '◐' : '◑';
+  const meta=document.querySelector('meta[name=theme-color]');
+  if(meta) meta.setAttribute('content', t==='dark' ? '#070808' : '#F4F6F7');
+}
+function flipTheme(){ applyTheme(theme()==='dark'?'light':'dark'); }
+
+/* ---------- PLAYER PHOTOS ----------
+   Three layers, each falling back to the next, so a face never
+   becomes a broken image:
+     1. headshot, if we have an id for that player
+     2. their NFL team logo
+     3. initials on the position colour
+   The id lookup is fetched once in the background and cached, so
+   the board is usable immediately and photos fill in as they load. */
+const HEAD = {};                 // player name -> headshot id
+let headsReady = false;
+const TEAMLOGO = t => 'https://a.espncdn.com/i/teamlogos/nfl/500/'+String(t||'').toLowerCase()+'.png';
+const HEADSHOT = id => 'https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
+
+function keyName(n){ return String(n||'').toLowerCase().replace(/[^a-z]/g,''); }
+function initials(n){
+  const p=String(n||'').replace(/[^A-Za-z ]/g,'').trim().split(/\s+/);
+  if(!p.length) return '?';
+  return (p.length>1 ? p[0][0]+p[p.length-1][0] : p[0].slice(0,2)).toUpperCase();
+}
+function avatar(pl, size){
+  if(!pl) return '';
+  const cls='av'+(size?' '+size:'');
+  const style='background:var(--'+pl.pos+')';
+  const mono='<span class="mono">'+esc(initials(pl.name))+'</span>';
+  if(pl.pos==='DST'){
+    return '<span class="'+cls+'" style="background:var(--p2)">'+
+      '<img class="logo" src="'+TEAMLOGO(pl.team)+'" alt="" loading="lazy" '+
+      'onerror="this.remove()">'+'</span>';
+  }
+  const id = HEAD[keyName(pl.name)];
+  if(id){
+    // headshot, falling back to the team logo, then to initials
+    return '<span class="'+cls+'" style="'+style+'">'+mono+
+      '<img src="'+HEADSHOT(id)+'" alt="" loading="lazy" style="position:absolute;inset:0" '+
+      'onerror="this.onerror=null;this.className=\'logo\';this.src=\''+TEAMLOGO(pl.team)+'\';">'+
+      '</span>';
+  }
+  return '<span class="'+cls+'" style="'+style+'">'+mono+
+    '<img class="logo" src="'+TEAMLOGO(pl.team)+'" alt="" loading="lazy" style="position:absolute;inset:0;opacity:.85" '+
+    'onerror="this.remove()">'+'</span>';
+}
+function loadHeadshots(){
+  if(get(LS+'_photos')==='off') return;
+  try{
+    const cached=get(LS+'_heads');
+    if(cached){ Object.assign(HEAD,JSON.parse(cached)); headsReady=true; return; }
+  }catch(e){}
+  if(typeof fetch!=='function'){ return; }
+  // one background fetch, then only the ids for players on our board are kept
+  fetch('https://api.sleeper.app/v1/players/nfl').then(r=>r.json()).then(all=>{
+    const want={}; POOL.forEach(p=>{ if(p.pos!=='DST') want[keyName(p.name)]=1; });
+    Object.keys(all).forEach(id=>{
+      const p=all[id]; if(!p||!p.full_name) return;
+      const k=keyName(p.full_name);
+      if(want[k] && !HEAD[k]) HEAD[k]=id;
+    });
+    headsReady=true;
+    try{ put(LS+'_heads',JSON.stringify(HEAD)); }catch(e){}
+    render();
+  }).catch(()=>{ /* logos and initials carry it */ });
+}
+
 function toast(m,bad){
   const o=document.querySelector('.toast'); if(o) o.remove();
   const e=document.createElement('div'); e.className='toast'+(bad?' bad':''); e.textContent=m;
@@ -717,6 +847,7 @@ function amCommish(){
   return get(LS+'_role_'+(Sync.room||'local'))==='commish';
 }
 function canIPick(){
+  if(MOCK.on) return mockIsMyTurn();
   if(!Sync.on) return true;
   if(over()||!S.started) return false;
   if(S.openPick||amCommish()) return true;
@@ -779,7 +910,7 @@ const Sync = {
   },
 
   pushAll(){
-    if(!this.on||!this.ref) return;
+    if(!this.on||MOCK.on||!this.ref) return;
     const picks={}; S.picks.forEach((p,i)=>picks[i]=p);
     this.ref.set({
       meta:{league:S.league,rounds:S.rounds,clockSec:S.clockSec,started:S.started,openPick:!!S.openPick},
@@ -789,7 +920,7 @@ const Sync = {
   /* one write, not three — three separate writes each trigger a read-back,
      and the first read-back would overwrite the edit still being sent */
   pushMeta(){
-    if(!this.on||!this.ref) return;
+    if(!this.on||MOCK.on||!this.ref) return;
     this.ref.update({
       meta:{league:S.league,rounds:S.rounds,clockSec:S.clockSec,started:S.started,openPick:!!S.openPick},
       teams:S.teams,
@@ -798,15 +929,15 @@ const Sync = {
   },
   /* append pick N only if nobody else got there first */
   addPick(idx, data, done){
-    if(!this.on||!this.ref){ done(true); return; }
+    if(!this.on||this===null||MOCK.on||!this.ref){ done(true); return; }
     this.ref.child('picks/'+idx).transaction(
       cur => cur===null ? data : undefined,
       (err, committed) => done(!err && committed)
     );
   },
-  removePick(idx){ if(this.on&&this.ref) this.ref.child('picks/'+idx).remove(); },
+  removePick(idx){ if(this.on&&!MOCK.on&&this.ref) this.ref.child('picks/'+idx).remove(); },
   setClaim(teamId, obj){
-    if(!this.on||!this.ref){ S.claims[teamId]=obj; saveLocal(); render(); return; }
+    if(!this.on||MOCK.on||!this.ref){ S.claims[teamId]=obj; saveLocal(); render(); return; }
     if(obj) this.ref.child('claims/'+teamId).set(obj); else this.ref.child('claims/'+teamId).remove();
   },
   leave(){
@@ -817,6 +948,7 @@ const Sync = {
 };
 
 function applyRemote(v){
+  if(MOCK.on) return;   // a practice run must not be disturbed by the real draft
   const m = v.meta||{};
   S.commish  = v.commish || null;
   S.league   = m.league || S.league;
@@ -852,10 +984,116 @@ function paintSync(){
   else { p.className='sync'; t.textContent='Reconnecting'; }
 }
 
-function saveLocal(){ try{ put(LS, JSON.stringify(S)); }catch(e){} }
+function saveLocal(){ if(MOCK.on) return; try{ put(LS, JSON.stringify(S)); }catch(e){} }
 function loadLocal(){ try{ const r=get(LS); if(r) return JSON.parse(r); }catch(e){} return null; }
 
-/* ---------- 9. CLOCK ---------- */
+/* ============================================================
+   MOCK DRAFT — a practice run against simulated managers.
+   Runs entirely in memory on this device. It never touches the
+   shared room, so you can rehearse while a real draft is set up.
+   ============================================================ */
+const MOCK = {on:false, slot:1, speed:1200, timer:null, saved:null, log:[]};
+
+/* Everything that writes to the database checks this. */
+function liveSync(){ return Sync.on && !MOCK.on; }
+
+function mockStart(slot, speed){
+  MOCK.saved = S;                       // set the real board aside
+  MOCK.on = true;
+  MOCK.slot = slot;
+  MOCK.speed = speed;
+  MOCK.log = [];
+  stopClock();
+  const st = blank();
+  st.league = 'Mock draft';
+  st.teams = st.teams.map((t,i)=>({name: i===(slot-1)?'You':'Manager '+(i+1), owner:''}));
+  st.order = st.teams.map((t,i)=>i);
+  st.rounds = ROSTER;
+  st.clockSec = 0;
+  st.started = true;
+  st.openPick = true;
+  S = st;
+  put(LS+'_myteam', String(slot-1));
+  view='draft'; render();
+  mockTick();
+}
+function mockStop(){
+  if(!MOCK.on) return;
+  MOCK.on=false;
+  if(MOCK.timer){ clearTimeout(MOCK.timer); MOCK.timer=null; }
+  S = MOCK.saved || blank();
+  MOCK.saved=null;
+  put(LS+'_myteam','');
+  view='draft'; resetClock(); render();
+  toast('Back on the real board');
+}
+function mockIsMyTurn(){ return MOCK.on && !over() && teamAt(atPick())===(MOCK.slot-1); }
+
+/* How a simulated manager chooses. Best available, bent by what the
+   roster still needs and by how real drafts actually flow: no kicker
+   in round two, no fifth receiver before a starting tight end. */
+function mockScore(p, team, roundNo){
+  let s = 1000 - p.rank;
+  const have = posCount(team,p.pos);
+  const need = openStarters(team);
+  const roundsLeft = S.rounds - roundNo + 1;
+
+  if(!canTake(team,p.pos).ok) return -1e9;
+
+  // kickers and defenses are last-two-rounds business
+  if((p.pos==='K'||p.pos==='DST')){
+    if(roundsLeft > 3) return -1e9;
+    if(need[p.pos==='K'?'K':'D/ST']) s += 260;
+    else return -1e9;
+  }
+  // fill starters before depth
+  const startNeed = {QB:need['QB']||0, RB:need['RB']||0, WR:need['WR']||0, TE:need['TE']||0};
+  if(startNeed[p.pos]) s += 130;
+  if((p.pos==='RB'||p.pos==='WR'||p.pos==='TE') && (need['FLEX']||0)) s += 55;
+
+  // one quarterback is plenty until late
+  if(p.pos==='QB'){
+    if(have>=1) s -= 400;
+    else if(roundNo<=4) s -= 130;
+  }
+  if(p.pos==='TE' && have>=1) s -= 320;
+  if(p.pos==='RB' && have>=5) s -= 200;
+  if(p.pos==='WR' && have>=5) s -= 200;
+
+  // a little noise so two runs are never identical
+  s += (Math.random()*70 - 20);
+  return s;
+}
+function mockPickFor(team){
+  const tk=takenSet();
+  const roundNo=roundOf(atPick());
+  const pool=POOL.filter(p=>!tk.has(p.id)).slice(0,90);
+  let best=null, bs=-Infinity;
+  pool.forEach(p=>{ const s=mockScore(p,team,roundNo); if(s>bs){bs=s;best=p;} });
+  if(!best){
+    const any=POOL.find(p=>!tk.has(p.id)&&canTake(team,p.pos).ok);
+    best=any||null;
+  }
+  return best;
+}
+function mockTick(){
+  if(!MOCK.on) return;
+  if(over()){ render(); toast('Mock draft finished'); return; }
+  if(mockIsMyTurn()){ render(); return; }   // wait for the human
+  MOCK.timer = setTimeout(()=>{
+    if(!MOCK.on) return;
+    const team=teamAt(atPick());
+    const p=mockPickFor(team);
+    if(!p){ MOCK.on=false; render(); return; }
+    S.picks.push({pid:p.id, by:'cpu', at:Date.now()});
+    flash=S.picks.length-1;
+    render();
+    mockTick();
+  }, MOCK.speed);
+}
+/* After the human picks, hand control back to the simulated managers. */
+function mockAfterHuman(){ if(MOCK.on) mockTick(); }
+
 function resetClock(){ clock.left=S.clockSec; paintClock(); }
 function startClock(){
   if(S.clockSec<=0||over()||!S.started) return;
@@ -895,31 +1133,33 @@ function makePick(pid, custom){
 
   Sync.addPick(idx, data, okd=>{
     if(!okd){ toast('Someone picked at the same moment. Try again.',1); return; }
-    if(!Sync.on){
+    if(!liveSync()){
       S.picks.push(data); flash=idx; ping(820,.09);
       resetClock(); if(!over()&&S.clockSec>0) startClock(); else stopClock();
-      saveLocal(); render();
-      if(over()) toast('Draft complete');
+      if(!MOCK.on) saveLocal();
+      render();
+      if(MOCK.on) mockAfterHuman();
+      else if(over()) toast('Draft complete');
     }
   });
 }
 function undo(){
   if(!S.picks.length){ toast('No picks to undo',1); return; }
-  if(Sync.on && !amCommish()){ toast('Only the commissioner can undo',1); return; }
+  if(liveSync() && !amCommish()){ toast('Only the commissioner can undo',1); return; }
   const i=S.picks.length-1, pl=playerOf(S.picks[i]);
-  if(Sync.on) Sync.removePick(i);
-  else { S.picks.pop(); saveLocal(); render(); }
+  if(liveSync()) Sync.removePick(i);
+  else { S.picks.pop(); if(!MOCK.on) saveLocal(); render(); }
   flash=null; resetClock(); stopClock();
   toast('Removed '+(pl?pl.name:'the last pick'));
 }
 function dropPick(i){
-  if(Sync.on && !amCommish()){ toast('Only the commissioner can change picks',1); return; }
-  if(Sync.on){
+  if(liveSync() && !amCommish()){ toast('Only the commissioner can change picks',1); return; }
+  if(liveSync()){
     const rest = S.picks.slice(i+1);
     const obj={}; S.picks.slice(0,i).forEach((p,k)=>obj[k]=p);
     rest.forEach((p,k)=>obj[i+k]=p);
     Sync.ref.child('picks').set(obj);
-  } else { S.picks.splice(i,1); saveLocal(); render(); }
+  } else { S.picks.splice(i,1); if(!MOCK.on) saveLocal(); render(); }
   flash=null; toast('Pick removed, the rest moved up');
 }
 
@@ -1100,6 +1340,7 @@ function poolRows(){
     const d = p.rank-(o+1);
     return '<div class="pr'+(i===selIdx?' sel':'')+(bad?' no':'')+'" data-pid="'+p.id+'">'+
       '<span class="rk">'+p.rank+'</span>'+
+      avatar(p)+
       '<div><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc(p.team)+'</div></div>'+
       '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span>'+
       '<span class="by'+(byes[p.bye]>=2?' hit':'')+'">'+(p.bye?'Bye '+p.bye:'—')+'</span>'+
@@ -1173,7 +1414,20 @@ function draftView(){
     '</p><div style="margin-top:12px"><button class="btn key" data-go="'+(over()?'rosters':'setup')+'">'+(over()?'See rosters':'Go to setup')+'</button></div></div>';
 
   const turn = live && !canIPick();
-  return ticker()+'<div class="dgrid"><section>'+
+  const mockBar = MOCK.on
+    ? '<div class="mockbar"><span class="lbl">Practice run</span>'+
+      '<span class="txt">'+(mockIsMyTurn()
+        ? 'Your pick, round '+roundOf(o)+'.'
+        : 'Manager '+(teamAt(o)+1)+' is thinking<span class="thinking"><i></i><i></i><i></i></span>')+
+      '</span>'+
+      '<select id="mkSpeed" style="width:auto"><option value="2200"'+(MOCK.speed==2200?' selected':'')+'>Slow</option>'+
+      '<option value="1200"'+(MOCK.speed==1200?' selected':'')+'>Normal</option>'+
+      '<option value="450"'+(MOCK.speed==450?' selected':'')+'>Fast</option>'+
+      '<option value="80"'+(MOCK.speed==80?' selected':'')+'>Instant</option></select>'+
+      '<button class="btn sm" id="mkEnd">End practice</button></div>'
+    : '';
+
+  return ticker()+mockBar+'<div class="dgrid"><section>'+
     (turn?'<div class="note" style="margin-bottom:11px">Waiting on '+esc(S.teams[teamAt(o)].name)+'. You will be able to pick when your turn comes.</div>':'')+
     '<div class="phead"><div class="sw"><span class="i">⌕</span>'+
     '<input type="text" id="q" placeholder="Search a player, then press Enter to draft" value="'+esc(query)+'" autocomplete="off"></div>'+
@@ -1200,6 +1454,7 @@ function tiersView(){
         const gone=tk.has(id);
         return '<div class="pc'+(gone?' gone':'')+(mine.has(id)?' mine':'')+'" data-pid="'+id+'">'+
           '<span class="ed" style="background:var(--'+p.pos+')"></span>'+
+          avatar(p,'sm')+
           '<span class="t">'+esc(p.name)+'</span>'+
           '<span class="m">'+esc(p.team)+' '+p.rank+'</span></div>';
       }).join(''):'<span class="none">Drag players here</span>')+
@@ -1228,7 +1483,7 @@ function boardView(){
       cells+='<div class="cl '+(pl?'has':live?'live':o>cur?'fut':'')+(o===flash?' new':'')+'" data-o="'+o+'"'+(pl?' data-ed="'+o+'"':'')+'>'+
         (pl?'<span class="e" style="background:var(--'+pl.pos+')"></span>':'')+
         '<span class="n">'+(o+1)+'</span>'+
-        (pl?'<div class="nm">'+esc(pl.name)+'</div><div class="mt">'+lab(pl.pos)+' '+esc(pl.team)+' bye '+(pl.bye||'—')+'</div>':'')+
+        (pl?'<div class="nm">'+esc(pl.name)+'</div><div class="mt">'+lab(pl.pos)+' '+esc(pl.team)+' bye '+(pl.bye||'—')+'</div>'+avatar(pl,'sm'):'')+
         '</div>';
     }
     out+='<div class="brow"><div class="rn">'+r+'<span class="d">'+(fwd?'▸':'◂')+'</span></div>'+cells+'</div>';
@@ -1276,6 +1531,7 @@ function setupView(){
       'Everyone on this link sees picks the moment they happen.</p>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
       '<button class="btn" id="bInvite">Copy the link</button>'+
+      '<button class="btn" id="bRoomBlock">Get the ROOM block for this file</button>'+
       (cm?'':'<button class="btn" id="bTakeover">Take over as commissioner</button>')+
       '<button class="btn" id="bLeave">Disconnect</button></div>'+
       (cm?'<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="bLock" '+(S.openPick?'':'checked')+' style="width:auto;margin-right:7px">Only let each manager pick for their own team</label>'+
@@ -1331,6 +1587,24 @@ function setupView(){
         (cm?'<button class="btn warn" id="bClear">Clear the board</button>':''))+
     '</div></div>'+
 
+    '<div class="card sec"><h2>Practice run</h2>'+
+    '<p class="h">Try the whole thing before draft day. Nine simulated managers pick around you so you can see how the board, the tiers and the clock behave. It runs only on this device and never touches the real draft.</p>'+
+    '<div class="grid2" style="max-width:520px">'+
+    '<div><label class="fl">Your draft slot</label><select id="mkSlot">'+
+    Array.from({length:T()},(_,i)=>'<option value="'+(i+1)+'"'+(i===0?' selected':'')+'>Slot '+(i+1)+'</option>').join('')+
+    '</select></div>'+
+    '<div><label class="fl">How fast they pick</label><select id="mkSpeed2">'+
+    '<option value="2200">Slow</option><option value="1200" selected>Normal</option>'+
+    '<option value="450">Fast</option><option value="80">Instant</option></select></div></div>'+
+    '<div style="margin-top:13px"><button class="btn key" id="mkGo">Start a practice draft</button></div></div>'+
+
+    '<div class="card sec"><h2>Appearance</h2>'+
+    '<p class="h">The board follows your device setting to begin with. Each person chooses their own.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn" id="thDark">Dark</button><button class="btn" id="thLight">Light</button></div>'+
+    '<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="phOn" '+(get(LS+'_photos')==='off'?'':'checked')+' style="width:auto;margin-right:7px">Show player photos</label>'+
+    '<span style="font-size:12px;color:var(--faint)">Photos load once in the background and are cached. Turn this off on a slow connection and you get team logos instead.</span></div></div>'+
+
     '<div class="card sec prose"><b>Running a half-virtual draft</b><ul>'+
     '<li>Everyone opens the same link and claims their team. The board updates on every device the moment a pick lands.</li>'+
     '<li>Two people picking at the same instant cannot both win. The second one gets told to pick again.</li>'+
@@ -1376,10 +1650,11 @@ function confirmPick(pid){
   const clash=lu.starters.filter(s=>s.player&&s.player.bye===p.bye).length;
   const ti=tierOf(pid);
   modal('<h3>Pick '+(o+1)+'</h3><p>Round '+roundOf(o)+', slot '+slotOf(o)+', '+esc(S.teams[t].name)+'</p>'+
-    '<div class="pcard"><div class="n">'+esc(p.name)+'</div><div class="m">'+
+    '<div class="pcard" style="display:flex;gap:12px;align-items:center">'+avatar(p,'lg')+
+    '<div><div class="n">'+esc(p.name)+'</div><div class="m">'+
     '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span> '+esc(p.team)+
     ' · bye '+(p.bye||'none')+' · ranked '+p.rank+
-    (ti!==null?' · '+esc(TIERS[p.pos][ti].name):'')+'</div></div>'+
+    (ti!==null?' · '+esc(TIERS[p.pos][ti].name):'')+'</div></div></div>'+
     (!c.ok?'<p style="color:var(--live);margin-top:12px">'+esc(c.why)+'</p>':'')+
     (c.ok&&clash>=2?'<p style="color:var(--t2);margin-top:12px">Two starters already have bye week '+p.bye+'.</p>':'')+
     '<div class="row"><button class="btn" data-x>Cancel</button>'+
@@ -1634,8 +1909,49 @@ function bind(){
       if(Sync.on){ Sync.ref.child('picks').remove(); Sync.pushMeta(); } else { saveLocal(); render(); }
     };
   };
-  const bcr=$('#bCreate'); if(bcr) bcr.onclick=setupRoomModal;
+  const bcr=$('#bCreate'); if(bcr) bcr.onclick=()=>{ if(MOCK.on) mockStop(); setupRoomModal(); };
   const bjn=$('#bJoin'); if(bjn) bjn.onclick=joinModal;
+  // practice run
+  const mkg=$('#mkGo'); if(mkg) mkg.onclick=()=>{
+    const slot=+($('#mkSlot').value||1), sp=+($('#mkSpeed2').value||1200);
+    mockStart(slot,sp);
+    toast('Practice draft started, you are slot '+slot);
+  };
+  const mke=$('#mkEnd'); if(mke) mke.onclick=mockStop;
+  const mks=$('#mkSpeed'); if(mks) mks.onchange=e=>{ MOCK.speed=+e.target.value; };
+
+  // appearance
+  const td=$('#thDark'); if(td) td.onclick=()=>applyTheme('dark');
+  const tl=$('#thLight'); if(tl) tl.onclick=()=>applyTheme('light');
+  const ph=$('#phOn'); if(ph) ph.onchange=e=>{
+    if(e.target.checked){ put(LS+'_photos','on'); loadHeadshots(); toast('Photos on'); }
+    else { put(LS+'_photos','off'); toast('Photos off, showing team logos'); }
+    render();
+  };
+
+  const brb=$('#bRoomBlock'); if(brb) brb.onclick=()=>{
+    const c=Sync.cfg||{};
+    const blk='const ROOM = {\n'+
+      '  databaseURL: "'+(c.databaseURL||'')+'",\n'+
+      '  apiKey:      "'+(c.apiKey||'')+'",\n'+
+      '  projectId:   "'+(c.projectId||'')+'",\n'+
+      '  roomName:    "'+(Sync.room||'2026')+'"\n'+
+      '};';
+    const ok = !!c.databaseURL;
+    modal('<h3>Paste this into the file</h3>'+
+      '<p>'+(ok
+        ? 'Replace the ROOM block near the top of index.html with this, then commit. After that everyone who opens the link joins automatically, with no setup on their end.'
+        : 'This device has no database address stored, so there is nothing to copy. Connect to the room first, or get the config from your Firebase console.')+'</p>'+
+      '<textarea rows="7" readonly onclick="this.select()">'+esc(blk)+'</textarea>'+
+      '<div class="row"><button class="btn" data-x>Close</button>'+
+      (ok?'<button class="btn key" id="rbCopy">Copy</button>':'')+'</div>');
+    const rc=$('#rbCopy'); if(rc) rc.onclick=()=>{
+      if(navigator.clipboard&&navigator.clipboard.writeText)
+        navigator.clipboard.writeText(blk).then(()=>{closeM();toast('Copied, now paste it into the file');});
+      else { $('.modal textarea').select(); toast('Select and copy the text'); }
+    };
+  };
+
   const biv=$('#bInvite'); if(biv) biv.onclick=invite;
   const bto=$('#bTakeover'); if(bto) bto.onclick=()=>{
     modal('<h3>Take over as commissioner</h3><p>Only do this if you are actually running the draft. It moves the ability to set the order, undo picks and clear the board to this device.</p>'+
@@ -1684,6 +2000,7 @@ function autoRoom(){
 }
 
 function boot(){
+  applyTheme(theme());
   S = loadLocal() || blank();
   if(!S.claims) S.claims={};
   if(!S.order||S.order.length!==S.teams.length) S.order=S.teams.map((t,i)=>i);
@@ -1691,7 +2008,9 @@ function boot(){
   TIERS = loadTiers();
   view = S.started?'draft':'setup';
   resetClock(); render();
+  loadHeadshots();
 
+  $('#bTheme').onclick=flipTheme;
   $('#bClock').onclick=()=>{ if(!S.started){toast('Start the draft first',1);return;} clock.run?stopClock():startClock(); };
   $('#bUndo').onclick=undo;
 
