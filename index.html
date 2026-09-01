@@ -348,6 +348,27 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 (function(){
 'use strict';
 
+/* ════════════════════════════════════════════════════════════
+   ROOM SETUP — fill this in once, commit, and you are done.
+
+   After that, everyone just opens the site. No code, no invite
+   link, no setup screen. They pick their name and start drafting.
+
+   Paste the values from your Firebase config between the quotes.
+   Project settings > Your apps > Web app, after you have created
+   the Realtime Database.
+
+   Leave it as is and the board still works, it just runs on one
+   screen and you can set up a room by hand from the Setup tab.
+   ════════════════════════════════════════════════════════════ */
+const ROOM = {
+  databaseURL: "",   // <- the only one that really matters
+  apiKey:      "",
+  projectId:   "",
+  roomName:    "2026"   // change this to start a completely fresh draft
+};
+/* ══════════════ nothing below here needs editing ══════════════ */
+
 /* ============================================================
    1. PLAYER POOL — half-PPR consensus, 2026 preseason.
    Name|POS|TEAM|BYE, order is board rank. Replaceable in Setup.
@@ -686,7 +707,11 @@ function myTeam(){
   for(const k in (S.claims||{})) if(S.claims[k] && S.claims[k].dev===d) return parseInt(k,10);
   return null;
 }
-function amCommish(){ return get(LS+'_role_'+(Sync.room||'local'))==='commish' || !Sync.on; }
+function amCommish(){
+  if(!Sync.on) return true;
+  if(S.commish) return S.commish===myDevice();
+  return get(LS+'_role_'+(Sync.room||'local'))==='commish';
+}
 function canIPick(){
   if(!Sync.on) return true;
   if(over()||!S.started) return false;
@@ -742,6 +767,10 @@ const Sync = {
       toast('Database refused the read. Check the rules allow access.',1);
     });
 
+    /* Nobody has to be told they are the commissioner: the first
+       device to open the room takes the role and it sticks. */
+    this.ref.child('commish').transaction(cur => cur===null ? myDevice() : undefined);
+
     cb&&cb(null);
   },
 
@@ -785,6 +814,7 @@ const Sync = {
 
 function applyRemote(v){
   const m = v.meta||{};
+  S.commish  = v.commish || null;
   S.league   = m.league || S.league;
   S.rounds   = m.rounds || S.rounds;
   S.clockSec = (m.clockSec===undefined? S.clockSec : m.clockSec);
@@ -808,6 +838,12 @@ function applyRemote(v){
   }
   saveLocal();
   render();
+  /* Show the picker as soon as we actually have the team names,
+     not on a timer that a slow connection would beat. */
+  if(Sync.on && !window.__gateDone && myTeam()===null && S.teams.length){
+    window.__gateDone = true;
+    welcomeGate();
+  }
 }
 
 function paintSync(){
@@ -1238,16 +1274,19 @@ function setupView(){
   const locked=S.picks.length>0, cm=amCommish(), mt=myTeam();
   const syncBlock = Sync.on
     ? '<div class="card sec"><h2>Draft room '+esc(Sync.room)+'</h2>'+
-      '<p class="h">'+(cm?'You are the commissioner, so you can undo picks and fix mistakes. ':'')+
-      'Everyone in this room sees picks the moment they happen.</p>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn key" id="bInvite">Copy invite link</button>'+
-      '<button class="btn" id="bLeave">Leave the room</button></div>'+
+      '<p class="h">'+(cm?'You are the commissioner, so you can set the order, undo picks and fix mistakes. ':'')+
+      'Everyone on this link sees picks the moment they happen.</p>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      (mt===null?'<button class="btn key" id="bWho">Pick my team</button>':'')+
+      '<button class="btn" id="bInvite">Copy the link</button>'+
+      (cm?'':'<button class="btn" id="bTakeover">Take over as commissioner</button>')+
+      '<button class="btn" id="bLeave">Disconnect</button></div>'+
       (cm?'<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="bOpen" '+(S.openPick?'checked':'')+' style="width:auto;margin-right:7px">Let anyone pick for any team</label>'+
-      '<span style="font-size:12px;color:var(--faint)">Useful if someone drops off and you need to pick for them.</span></div>':'')+
+      '<span style="font-size:12px;color:var(--faint)">Turn this on if someone drops off and you need to pick for them.</span></div>':'')+
       '</div>'
     : '<div class="card sec"><h2>Draft from separate devices</h2>'+
-      '<p class="h">Right now this board only lives on this device. To let all ten managers pick from their own laptops and phones, connect a free Firebase database. It takes about ten minutes once, and only the commissioner has to do it.</p>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn key" id="bCreate">Set up the shared room</button>'+
+      '<p class="h">This board is only on this device right now. To let all ten managers pick from their own laptops and phones, connect a free Firebase database once and paste the details into the ROOM block at the top of the file. After that everyone just opens the link.</p>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn key" id="bCreate">Set up a room now</button>'+
       '<button class="btn" id="bJoin">Join with a code</button></div></div>';
 
   const claimBlock = Sync.on ? '<div class="card sec"><h2>Who is who</h2>'+
@@ -1442,6 +1481,14 @@ function readCfg(text){
 }
 function invite(){
   if(!Sync.on){ toast('Set up the shared room first',1); return; }
+  // With the room baked into the file the plain address is all anyone needs.
+  if(ROOM && ROOM.databaseURL){
+    const plain=location.origin+location.pathname;
+    if(navigator.clipboard&&navigator.clipboard.writeText)
+      navigator.clipboard.writeText(plain).then(()=>toast('Link copied')).catch(()=>showLink(plain));
+    else showLink(plain);
+    return;
+  }
   const payload=btoa(unescape(encodeURIComponent(JSON.stringify({c:Sync.cfg,r:Sync.room}))))
     .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   const url=location.origin+location.pathname+'#j='+payload;
@@ -1490,6 +1537,30 @@ function putFocus(f){
   el.focus();
   try{ el.setSelectionRange(f.s,f.e); }catch(e){}
 }
+/* Someone opening the link for the first time should see one question,
+   not a setup form. Which of these teams is yours. */
+function welcomeGate(){
+  if(!Sync.on || myTeam()!==null) return;
+  if($('#ov').innerHTML.indexOf('data-pick-team')>=0) return;
+  const free = S.order.map((tid,i)=>({tid:tid,slot:i+1})).filter(o=>!(S.claims||{})[o.tid]);
+  const taken = S.order.length - free.length;
+  modal('<h3>Welcome to '+esc(S.league)+'</h3>'+
+    '<p>Pick your team to get started. '+(taken?taken+' already claimed.':'')+'</p>'+
+    (free.length
+      ? '<div style="display:flex;flex-direction:column;gap:6px">'+free.map(o=>
+          '<button class="btn" data-pick-team="'+o.tid+'" style="justify-content:space-between;width:100%">'+
+          '<span>'+esc(S.teams[o.tid].name)+'</span>'+
+          '<span style="color:var(--faint);font-size:12px">slot '+o.slot+'</span></button>').join('')+'</div>'
+      : '<p style="color:var(--dim)">Every team is claimed. If one of them is yours, release it on the Setup tab from the device that claimed it.</p>')+
+    '<div class="row"><button class="btn gh" data-x>Just watching</button></div>');
+  $$('[data-pick-team]').forEach(b=>b.onclick=()=>{
+    const t=+b.dataset.pickTeam;
+    Sync.setClaim(t,{dev:myDevice(),who:S.teams[t].name});
+    put(LS+'_myteam',String(t));
+    closeM(); toast('You are '+S.teams[t].name);
+  });
+}
+
 function render(){
   const f=keepFocus();
   head();
@@ -1598,6 +1669,17 @@ function bind(){
   const bcr=$('#bCreate'); if(bcr) bcr.onclick=setupRoomModal;
   const bjn=$('#bJoin'); if(bjn) bjn.onclick=joinModal;
   const biv=$('#bInvite'); if(biv) biv.onclick=invite;
+  const bwho=$('#bWho'); if(bwho) bwho.onclick=welcomeGate;
+  const bto=$('#bTakeover'); if(bto) bto.onclick=()=>{
+    modal('<h3>Take over as commissioner</h3><p>Only do this if you are actually running the draft. It moves the ability to set the order, undo picks and clear the board to this device.</p>'+
+      '<div class="row"><button class="btn" data-x>Cancel</button><button class="btn key" id="toGo">Take over</button></div>');
+    $('#toGo').onclick=()=>{
+      closeM();
+      Sync.ref.child('commish').set(myDevice());
+      put(LS+'_role_'+Sync.room,'commish');
+      toast('You are now the commissioner');
+    };
+  };
   const blv=$('#bLeave'); if(blv) blv.onclick=()=>{ Sync.leave(); toast('Left the room'); render(); };
   const bop=$('#bOpen'); if(bop) bop.onchange=e=>{ S.openPick=e.target.checked; if(Sync.on) Sync.pushMeta(); saveLocal(); };
   $$('[data-claim]').forEach(b=>b.onclick=()=>{
@@ -1614,6 +1696,20 @@ function mark(){
 }
 
 /* ---------- 16. BOOT ---------- */
+function autoRoom(){
+  if(!ROOM || !ROOM.databaseURL) return false;
+  const cfg={databaseURL:ROOM.databaseURL};
+  if(ROOM.apiKey) cfg.apiKey=ROOM.apiKey;
+  if(ROOM.projectId) cfg.projectId=ROOM.projectId;
+  const room=(ROOM.roomName||'2026').toUpperCase().replace(/[^A-Z0-9]/g,'')||'2026';
+  const go=()=>Sync.start(cfg,room,false,err=>{
+    if(err){ toast(err,1); render(); return; }
+    render();
+  });
+  if(Sync.ready()) go(); else setTimeout(go,1400);
+  return true;
+}
+
 function boot(){
   S = loadLocal() || blank();
   if(!S.claims) S.claims={};
@@ -1633,13 +1729,16 @@ function boot(){
     if(e.key==='/'){e.preventDefault();view='draft';render();const q=$('#q');if(q)q.focus();}
   });
 
+  // A room baked into the file wins: everyone lands straight in it.
+  if(autoRoom()) return;
+
   // auto-join from an invite link
   if(location.hash.startsWith('#j=')){
     try{
       const raw=location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/');
       const j=JSON.parse(decodeURIComponent(escape(atob(raw))));
       history.replaceState(null,'',location.pathname);
-      const go=()=>Sync.start(j.c,j.r,false,err=>{ if(err){toast(err,1);return;} toast('Connected to room '+j.r); render(); });
+      const go=()=>Sync.start(j.c,j.r,false,err=>{ if(err){toast(err,1);return;} toast('Connected to room '+j.r); render(); setTimeout(welcomeGate,600); });
       if(Sync.ready()) go(); else setTimeout(go,1200);
     }catch(e){}
   } else {
