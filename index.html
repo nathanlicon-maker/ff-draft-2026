@@ -406,17 +406,12 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 'use strict';
 
 /* ════════════════════════════════════════════════════════════
-   ROOM SETUP — fill this in once, commit, and you are done.
-
-   After that, everyone just opens the site. No code, no invite
-   link, no setup screen. They pick their name and start drafting.
-
-   Paste the values from your Firebase config between the quotes.
-   Project settings > Your apps > Web app, after you have created
-   the Realtime Database.
-
-   Leave it as is and the board still works, it just runs on one
-   screen and you can set up a room by hand from the Setup tab.
+const ROOM = {
+  databaseURL: "https://fantasy-draft-2026-49f28-default-rtdb.firebaseio.com",
+  apiKey:      "AIzaSyCxGa6qkEKnLFqIVPZcpvbJqJmkp26wuEA",
+  projectId:   "fantasy-draft-2026-49f28",
+  roomName:    "2026"
+};
    ════════════════════════════════════════════════════════════ */
 const ROOM = {
   databaseURL: "",   // <- the only one that really matters
