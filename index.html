@@ -20,6 +20,7 @@
   --dim:#909A8D;
   --faint:#6C776A;
   --chip:#0C110D;
+  --av:#000000;
   --shadow:rgba(0,0,0,.5);
   --scrim:rgba(6,10,7,.78);
   --head:#B9E96C;
@@ -47,6 +48,7 @@
   --dim:#66705E;
   --faint:#6E7A66;
   --chip:#FFFFFF;
+  --av:#FFFFFF;
   --shadow:rgba(60,72,48,.10);
   --scrim:rgba(45,55,38,.38);
   --head:#47701E;
@@ -216,42 +218,6 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .ba .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ba .r{font-size:11px;color:var(--faint)}
 
-/* ---------- TIER BOARD (signature) ---------- */
-.tb-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 12px}
-.tb-cols{display:flex;gap:3px;flex-wrap:wrap}
-.tb-cols button{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--p1);color:var(--dim)}
-.tb-cols button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:700}
-.tiers{display:flex;flex-direction:column;gap:7px}
-.tier{display:grid;grid-template-columns:112px minmax(0,1fr);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--p1);box-shadow:0 1px 2px var(--shadow)}
-.tier.over{border-color:var(--tx);background:var(--p2)}
-.tlab{
-  padding:11px 10px;display:flex;flex-direction:column;justify-content:center;gap:3px;
-  border-right:1px solid var(--line);position:relative;min-height:64px;
-}
-.tlab::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc)}
-.tlab .tn{font-family:var(--disp);font-weight:800;font-size:16px;color:var(--tc);line-height:1;padding-left:6px}
-.tlab input{background:transparent;border:none;padding:0 0 0 6px;font-family:var(--disp);font-weight:800;font-size:16px;color:var(--tc);width:100%}
-.tlab .tc2{font-size:11px;color:var(--faint);padding-left:6px}
-.tlab .tools{display:flex;gap:2px;padding-left:3px;margin-top:3px}
-.tlab .tools button{font-size:11px;color:var(--faint);padding:2px 5px;border-radius:3px}
-.tlab .tools button:hover{background:var(--p3);color:var(--tx)}
-.tzone{display:flex;flex-wrap:wrap;gap:5px;padding:9px;min-height:64px;align-content:flex-start}
-.pc{
-  display:flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;border-radius:99px;background:var(--p1);
-  border:1px solid var(--line);cursor:grab;touch-action:none;position:relative;overflow:hidden;user-select:none;
-}
-.pc:hover{border-color:var(--faint)}
-.pc .ed{position:absolute;left:0;top:0;bottom:0;width:3px}
-.pc .t{font-size:12.5px;font-weight:600;white-space:nowrap;padding-left:3px}
-.pc .m{font-size:10.5px;color:var(--faint);white-space:nowrap}
-.pc.gone{opacity:.3}
-.pc.gone .t{text-decoration:line-through;text-decoration-thickness:1.5px}
-.pc.mine{border-color:var(--ok);background:rgba(74,222,128,.09)}
-.pc.drag{opacity:.28}
-.pc.ghost{position:fixed;z-index:500;pointer-events:none;box-shadow:0 10px 30px var(--shadow);cursor:grabbing;border-color:var(--tx)}
-.tzone .ins{width:2px;height:30px;background:var(--tx);border-radius:2px;flex:none}
-.tzone .none{color:var(--faint);font-size:12px;padding:6px 2px}
-
 /* ---------- big board ---------- */
 .bwrap{margin-top:14px}
 .leg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;font-size:11.5px;color:var(--faint)}
@@ -331,17 +297,17 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 /* ---------- player avatars ---------- */
 .av{
   width:34px;height:34px;border-radius:50%;flex:none;position:relative;overflow:hidden;
-  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  background:var(--av);display:flex;align-items:center;justify-content:center;
 }
-.av img{width:100%;height:100%;object-fit:cover;display:block}
-.av img.logo{object-fit:contain;padding:4px;background:transparent}
+.av img{width:100%;height:100%;object-fit:cover;display:block;background:var(--av)}
+.av img.logo{object-fit:contain;padding:4px;background:var(--av)}
 .av .mono{font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.01em}
 .av.sm{width:26px;height:26px}
 .av.sm .mono{font-size:10.5px}
 .av.lg{width:56px;height:56px}
 .av.lg .mono{font-size:20px}
 .av .ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 2px var(--pc,transparent)}
-.pr{grid-template-columns:34px 40px 1fr 44px 58px 46px 30px}
+.pr{grid-template-columns:34px 40px 1fr 46px 62px 30px}
 .pc .av{margin-right:1px}
 .cl .av{position:absolute;right:5px;bottom:5px;width:22px;height:22px;opacity:.9}
 .cl .nm{padding-right:26px}
@@ -382,10 +348,9 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
   .mark h1{font-size:18px}
   .otc .nm{font-size:16px;max-width:42vw}
   .tm{font-size:21px;min-width:74px}
-  .pr{grid-template-columns:30px 30px 1fr 42px 48px;gap:8px}
+  .pr{grid-template-columns:30px 32px 1fr 44px 52px;gap:8px}
   .pr .by,.pr .st{display:none}
   .wrap{padding:0 12px 80px}
-  .tier{grid-template-columns:88px minmax(0,1fr)}
   .trow{grid-template-columns:28px minmax(0,1fr) auto;grid-template-rows:auto auto;row-gap:5px}
   .trow .no{grid-column:1;grid-row:1/3;display:flex;align-items:center;justify-content:center}
   .trow input:nth-of-type(1){grid-column:2;grid-row:1}
@@ -667,12 +632,11 @@ const SCORING = {
   'Points allowed by defense':[['14 to 17','-1',1],['18 to 21','-2',1],['22 to 27','-3',1],['28 to 34','-4',1],['35 to 45','-5',1],['46 or more','-6',1]]
 };
 
-const TIER_COLORS = ['--t1','--t2','--t3','--t4','--t5','--t6','--t7'];
 
 /* ---------- 3. GLOBALS ---------- */
 const LS = 'draftroom26';
-let POOL = [], S = null, TIERS = null;
-let view = 'setup', filterPos = 'ALL', query = '', selIdx = 0, tierPos = 'RB';
+let POOL = [], S = null;
+let view = 'setup', filterPos = 'ALL', query = '', selIdx = 0;
 let clock = {run:false,left:0,h:null};
 let flash = null, me = null;
 
@@ -737,25 +701,32 @@ function avatar(pl, size){
     '<img class="logo" src="'+TEAMLOGO(pl.team)+'" alt="" loading="lazy" style="position:absolute;inset:0" '+
     'onerror="this.remove()">'+'</span>';
 }
-function loadHeadshots(){
-  if(get(LS+'_photos')==='off') return;
+/* One request does two jobs: it supplies the headshot ids and the rest
+   of the league. Cached afterwards, so it only happens once per device. */
+function loadRoster(){
   try{
-    const cached=get(LS+'_heads');
-    if(cached){ Object.assign(HEAD,JSON.parse(cached)); headsReady=true; return; }
+    const cached=get(LS+'_roster');
+    if(cached){
+      const c=JSON.parse(cached);
+      Object.assign(HEAD,c.h||{});
+      (c.x||[]).forEach(r=>POOL.push({name:r[0],pos:r[1],team:r[2],bye:r[3]}));
+      reindexPool(); poolExtended=true; headsReady=true;
+      return;
+    }
   }catch(e){}
-  if(typeof fetch!=='function'){ return; }
-  // one background fetch, then only the ids for players on our board are kept
+  reindexPool();
+  if(typeof fetch!=='function') return;
   fetch('https://api.sleeper.app/v1/players/nfl').then(r=>r.json()).then(all=>{
-    const want={}; POOL.forEach(p=>{ if(p.pos!=='DST') want[keyName(p.name)]=1; });
-    Object.keys(all).forEach(id=>{
-      const p=all[id]; if(!p||!p.full_name) return;
-      const k=keyName(p.full_name);
-      if(want[k] && !HEAD[k]) HEAD[k]=id;
-    });
+    const before=POOL.length;
+    extendPool(all);
     headsReady=true;
-    try{ put(LS+'_heads',JSON.stringify(HEAD)); }catch(e){}
+    try{
+      const x=POOL.slice(before).map(p=>[p.name,p.pos,p.team,p.bye]);
+      put(LS+'_roster', JSON.stringify({h:HEAD, x:x}));
+    }catch(e){}
     render();
-  }).catch(()=>{ /* logos and initials carry it */ });
+    toast(POOL.length+' players available');
+  }).catch(()=>{ /* the ranked core still works on its own */ });
 }
 
 function toast(m,bad){
@@ -790,6 +761,70 @@ function parsePool(t){
   return out;
 }
 
+/* ---------- PLAYER POOL, FULL LEAGUE ----------
+   The list above is the ranked core: consensus order for the players
+   who actually go in the first fifteen rounds. Everyone else on an NFL
+   roster gets appended after it so nobody is undraftable, ordered by
+   how much fantasy interest they draw.
+
+   The core keeps its order no matter what, so a pick made before the
+   extra names arrive still points at the right player. */
+const NAMEIDX = {};                 // "name|POS" -> pool index
+const TEAMBYE = {};                 // NFL team -> bye week
+let poolExtended = false;
+
+/* There is exactly one defense per NFL team, and the sources name them
+   differently ("Denver D/ST" vs "DEN D/ST"), so match those on the team
+   instead of the name or every defense lands on the board twice. */
+function dkey(pos,name,team){
+  return pos==='DST' ? ('DST|'+(team||'')) : (keyName(name)+'|'+pos);
+}
+function reindexPool(){
+  const c={};
+  POOL.forEach((p,i)=>{
+    p.id=i; p.rank=i+1;
+    c[p.pos]=(c[p.pos]||0)+1; p.posRank=c[p.pos];
+    NAMEIDX[dkey(p.pos,p.name,p.team)]=i;
+    if(p.bye && p.team) TEAMBYE[p.team]=p.bye;
+  });
+}
+const SLEEPER_POS = {QB:'QB',RB:'RB',WR:'WR',TE:'TE',K:'K',DEF:'DST'};
+
+function extendPool(all){
+  if(!all){ reindexPool(); return; }
+  const have={};
+  POOL.forEach(p=>{ have[dkey(p.pos,p.name,p.team)]=1; });
+  reindexPool();                                     // fills TEAMBYE from the core
+  const extra=[];
+  Object.keys(all).forEach(id=>{
+    const s=all[id];
+    if(!s) return;
+    const pos=SLEEPER_POS[s.position];
+    if(!pos) return;
+    if(!s.team) return;                              // must be on a roster
+    if(s.active===false) return;
+    const name = pos==='DST' ? (s.team+' D/ST') : (s.full_name || ((s.first_name||'')+' '+(s.last_name||'')).trim());
+    if(!name) return;
+    const k=dkey(pos,name,s.team);
+    if(have[k]) return;
+    have[k]=1;
+    extra.push({
+      name:name, pos:pos, team:s.team,
+      bye:TEAMBYE[s.team]||0,
+      _rk:(typeof s.search_rank==='number' && s.search_rank>0) ? s.search_rank : 999999,
+      _id:id
+    });
+  });
+  // most fantasy-relevant first, then alphabetical so every device agrees
+  extra.sort((x,y)=> x._rk!==y._rk ? x._rk-y._rk : (x.name<y.name?-1:1));
+  extra.forEach(e=>{
+    if(e._id && e.pos!=='DST') HEAD[keyName(e.name)]=e._id;
+    POOL.push({name:e.name,pos:e.pos,team:e.team,bye:e.bye});
+  });
+  reindexPool();
+  poolExtended=true;
+}
+
 function blank(){
   return {
     league:'Draft Room', rounds:ROSTER, clockSec:90,
@@ -810,12 +845,29 @@ const over = () => atPick() >= totalPicks();
 const code = o => roundOf(o)+'.'+String(slotOf(o)).padStart(2,'0');
 
 /* ---------- 6. DERIVED ---------- */
+/* A pick carries the player's own details, not just a pool index.
+   The pool can grow (or a device can load it late) without pick 118
+   suddenly resolving to a different player on someone else's screen.
+   Older picks that only stored an index still resolve, because the
+   ranked core of the pool never changes order. */
 function playerOf(p){
   if(!p) return null;
   if(p.custom) return Object.assign({id:-1,rank:9999,posRank:0},p.custom);
+  if(p.n) return {id:(p.pid===undefined?-1:p.pid), name:p.n, pos:p.p, team:p.t||'FA',
+                  bye:p.b||0, rank:p.r||9999, posRank:p.pr||0};
   return POOL[p.pid]||null;
 }
-function takenSet(){ const s=new Set(); S.picks.forEach(p=>{ if(!p.custom) s.add(p.pid); }); return s; }
+function takenSet(){
+  const s=new Set();
+  S.picks.forEach(pk=>{
+    const pl=playerOf(pk);
+    if(!pl) return;
+    if(pk.pid!==undefined && pk.pid>=0) s.add(pk.pid);
+    const byName=NAMEIDX[dkey(pl.pos,pl.name,pl.team)];
+    if(byName!==undefined) s.add(byName);
+  });
+  return s;
+}
 function rosterOf(t){
   const r=[]; S.picks.forEach((p,i)=>{ if(teamAt(i)===t){ const pl=playerOf(p); if(pl) r.push(Object.assign({},pl,{at:i})); } });
   return r;
@@ -1108,7 +1160,7 @@ function mockTick(){
     const team=teamAt(atPick());
     const p=mockPickFor(team);
     if(!p){ MOCK.on=false; render(); return; }
-    S.picks.push({pid:p.id, by:'cpu', at:Date.now()});
+    S.picks.push({pid:p.id, n:p.name, p:p.pos, t:p.team, b:p.bye||0, r:p.rank, pr:p.posRank, by:'cpu', at:Date.now()});
     flash=S.picks.length-1;
     render();
     mockTick();
@@ -1152,7 +1204,10 @@ function makePick(pid, custom){
   if(!c.ok){ toast(c.why,1); return; }
   if(!custom && takenSet().has(pid)){ toast('Already drafted',1); return; }
 
-  const data = custom ? {custom:custom, by:myDevice(), at:Date.now()} : {pid:pid, by:myDevice(), at:Date.now()};
+  const data = custom
+    ? {custom:custom, by:myDevice(), at:Date.now()}
+    : {pid:pid, n:pl.name, p:pl.pos, t:pl.team, b:pl.bye||0, r:pl.rank, pr:pl.posRank,
+       by:myDevice(), at:Date.now()};
 
   Sync.addPick(idx, data, okd=>{
     if(!okd){ toast('Someone picked at the same moment. Try again.',1); return; }
@@ -1186,122 +1241,8 @@ function dropPick(i){
   flash=null; toast('Pick removed, the rest moved up');
 }
 
-/* ============================================================
-   11. TIERS — personal to each device, saved locally.
-   Auto-built from gaps in the board rank, then edited by hand.
-   ============================================================ */
-const GAP = {QB:9,RB:6,WR:6,TE:8,K:10,DST:10};
-
-function autoTiers(pos){
-  const list = POOL.filter(p=>p.pos===pos).sort((a,b)=>a.rank-b.rank);
-  const out=[]; let cur=[];
-  list.forEach((p,i)=>{
-    if(i>0){
-      const gap = p.rank - list[i-1].rank;
-      if(gap >= GAP[pos] || cur.length>=8){ out.push(cur); cur=[]; }
-    }
-    cur.push(p.id);
-  });
-  if(cur.length) out.push(cur);
-  return out.map((ids,i)=>({name:'Tier '+(i+1), ids:ids}));
-}
-function buildTiers(){
-  const t={}; POSITIONS.forEach(p=>t[p]=autoTiers(p)); return t;
-}
-function tierKey(){ return LS+'_tiers_'+(POOL.length)+'_'+(POOL[0]?POOL[0].name.slice(0,6):''); }
-function loadTiers(){
-  try{ const r=get(tierKey()); if(r){ const t=JSON.parse(r); if(t&&t.RB) return t; } }catch(e){}
-  return buildTiers();
-}
-function saveTiers(){ try{ put(tierKey(), JSON.stringify(TIERS)); }catch(e){} }
-function tierOf(pid){
-  const p=POOL[pid]; if(!p||!TIERS[p.pos]) return null;
-  const list=TIERS[p.pos];
-  for(let i=0;i<list.length;i++) if(list[i].ids.indexOf(pid)>=0) return i;
-  return null;
-}
-/* how many are left in a tier, and is it about to break */
-function tierLeft(pos,i){
-  const tk=takenSet();
-  return TIERS[pos][i].ids.filter(id=>!tk.has(id)).length;
-}
-function topOpenTier(pos){
-  for(let i=0;i<TIERS[pos].length;i++) if(tierLeft(pos,i)>0) return i;
-  return -1;
-}
-
-/* ---------- 12. DRAG (pointer based, works with touch) ---------- */
-const drag = {on:false,pid:null,from:null,ghost:null,sx:0,sy:0,armed:false};
-
-function onDown(e){
-  const chip=e.target.closest('.pc'); if(!chip||chip.dataset.lock==='1') return;
-  drag.armed=true; drag.pid=parseInt(chip.dataset.pid,10);
-  drag.from=chip; drag.sx=e.clientX; drag.sy=e.clientY;
-  chip.setPointerCapture && chip.setPointerCapture(e.pointerId);
-}
-function onMove(e){
-  if(!drag.armed) return;
-  if(!drag.on){
-    if(Math.abs(e.clientX-drag.sx)<6 && Math.abs(e.clientY-drag.sy)<6) return;
-    drag.on=true;
-    const r=drag.from.getBoundingClientRect();
-    const g=drag.from.cloneNode(true);
-    g.className='pc ghost'; g.style.width=r.width+'px';
-    g.style.left=r.left+'px'; g.style.top=r.top+'px';
-    g.dataset.ox=(e.clientX-r.left); g.dataset.oy=(e.clientY-r.top);
-    document.body.appendChild(g); drag.ghost=g;
-    drag.from.classList.add('drag');
-  }
-  e.preventDefault();
-  const g=drag.ghost;
-  g.style.left=(e.clientX-parseFloat(g.dataset.ox))+'px';
-  g.style.top=(e.clientY-parseFloat(g.dataset.oy))+'px';
-
-  g.style.display='none';
-  const el=document.elementFromPoint(e.clientX,e.clientY);
-  g.style.display='';
-  $$('.tier').forEach(t=>t.classList.remove('over'));
-  $$('.tzone .ins').forEach(n=>n.remove());
-  const zone = el && el.closest('.tzone');
-  if(zone){
-    zone.parentElement.classList.add('over');
-    const chips=Array.from(zone.querySelectorAll('.pc:not(.drag)'));
-    let before=null;
-    for(const c of chips){
-      const r=c.getBoundingClientRect();
-      if(e.clientY < r.top+r.height/2 || (e.clientY < r.bottom && e.clientX < r.left+r.width/2)){ before=c; break; }
-    }
-    const ins=document.createElement('span'); ins.className='ins';
-    if(before) zone.insertBefore(ins,before); else zone.appendChild(ins);
-  }
-}
-function onUp(e){
-  if(!drag.armed){ return; }
-  if(!drag.on){ drag.armed=false; return; }
-  const g=drag.ghost;
-  g.style.display='none';
-  const el=document.elementFromPoint(e.clientX,e.clientY);
-  g.style.display='';
-  const zone = el && el.closest('.tzone');
-  if(zone){
-    const pos = POOL[drag.pid].pos;
-    const toTier = parseInt(zone.dataset.tier,10);
-    const ins = zone.querySelector('.ins');
-    let at = ins ? Array.from(zone.children).filter(n=>n.classList.contains('pc')||n.classList.contains('ins')).indexOf(ins) : 999;
-    TIERS[pos].forEach(t=>{ const k=t.ids.indexOf(drag.pid); if(k>=0) t.ids.splice(k,1); });
-    const dest=TIERS[pos][toTier];
-    if(dest){ dest.ids.splice(Math.min(at,dest.ids.length),0,drag.pid); }
-    saveTiers();
-  }
-  g.remove();
-  drag.on=false; drag.armed=false; drag.ghost=null;
-  if(drag.from) drag.from.classList.remove('drag');
-  drag.from=null;
-  render();
-}
-
 /* ---------- 13. VIEWS ---------- */
-const TABS=[{k:'draft',l:'Draft'},{k:'tiers',l:'Tiers'},{k:'board',l:'Board'},{k:'rosters',l:'Rosters'},{k:'setup',l:'Setup'},{k:'scoring',l:'Scoring'}];
+const TABS=[{k:'draft',l:'Draft'},{k:'board',l:'Board'},{k:'rosters',l:'Rosters'},{k:'setup',l:'Setup'},{k:'scoring',l:'Scoring'}];
 
 function head(){
   $('#lgName').textContent = S.league||'Draft Room';
@@ -1359,7 +1300,6 @@ function poolRows(){
   if(mt!==null) lineup(mt).starters.forEach(s=>{ if(s.player&&s.player.bye) byes[s.player.bye]=(byes[s.player.bye]||0)+1; });
   const html = list.slice(0,280).map((p,i)=>{
     const bad = t!==null && !canTake(t,p.pos).ok;
-    const ti = tierOf(p.id);
     const d = p.rank-(o+1);
     return '<div class="pr'+(i===selIdx?' sel':'')+(bad?' no':'')+'" data-pid="'+p.id+'">'+
       '<span class="rk">'+p.rank+'</span>'+
@@ -1367,7 +1307,6 @@ function poolRows(){
       '<div><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc(p.team)+'</div></div>'+
       '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span>'+
       '<span class="by'+(byes[p.bye]>=2?' hit':'')+'">'+(p.bye?'Bye '+p.bye:'—')+'</span>'+
-      (ti!==null?'<span class="tr" style="color:var('+TIER_COLORS[Math.min(ti,6)]+')">T'+(ti+1)+'</span>':'<span class="tr"></span>')+
       '<span class="st"></span></div>';
   }).join('');
   return {html:html,list:list};
@@ -1400,20 +1339,6 @@ function draftView(){
       (need>0&&left<=need?'<div class="note hot">'+left+' picks left and '+need+' starting spots still open: '+Object.keys(miss).join(', ')+'.</div>':'')+
       (np>=0&&np!==o?'<div class="note">Next pick at '+code(np)+', '+(np-o)+' away.</div>':'')+
       '</div>';
-  }
-
-  // tier pressure — what's about to run out before your next pick
-  if(focus!==null && live){
-    const np=nextPickFor(focus);
-    const gap = np>o ? np-o : 0;
-    const rows=POSITIONS.map(p=>{
-      const ti=topOpenTier(p); if(ti<0) return '';
-      const n=tierLeft(p,ti);
-      const risk = gap>0 && n<=gap;
-      return '<div class="qn"><span class="p" style="color:var('+TIER_COLORS[Math.min(ti,6)]+')">'+lab(p)+' T'+(ti+1)+'</span>'+
-        '<span class="n">'+n+' left</span>'+(risk?'<span class="on" style="color:var(--live)">at risk</span>':'')+'</div>';
-    }).join('');
-    rail += '<div class="card"><h3>Tier pressure<small>'+(gap>0?gap+' picks until yours':'you are up')+'</small></h3>'+rows+'</div>';
   }
 
   const upn=[];
@@ -1452,7 +1377,7 @@ function draftView(){
 
   const tk2=takenSet().size + S.picks.filter(p=>p.custom).length;
   const top='<div class="boardtop"><div><h2>Draft board</h2>'+
-    '<div class="sub">Search, filter and draft. Tiers live on their own tab.</div></div>'+
+    '<div class="sub">Search a name and press Enter, or click a row to draft.</div></div>'+
     '<div class="counts">'+
     '<span class="cpill">'+POOL.length+' total</span>'+
     '<span class="cpill live">'+(POOL.length-takenSet().size)+' available</span>'+
@@ -1465,38 +1390,6 @@ function draftView(){
     '<div class="fl-row">'+['ALL'].concat(POSITIONS).map(p=>'<button class="'+(filterPos===p?'on':'')+'" data-f="'+p+'">'+(p==='ALL'?'All':lab(p))+'</button>').join('')+'</div>'+
     '<button class="btn sm" id="bCustom">Add a player</button></div>'+
     '<div class="pool" id="pool">'+pr.html+'</div></section><aside class="rail">'+rail+'</aside></div>';
-}
-
-function tiersView(){
-  const tk=takenSet(), mt=myTeam();
-  const mine = mt!==null ? new Set(rosterOf(mt).map(p=>p.id)) : new Set();
-  const list = TIERS[tierPos]||[];
-  const rows = list.map((t,i)=>{
-    const c = 'var('+TIER_COLORS[Math.min(i,6)]+')';
-    const left = t.ids.filter(id=>!tk.has(id)).length;
-    return '<div class="tier" style="--tc:'+c+'"><div class="tlab">'+
-      '<input value="'+esc(t.name)+'" data-rn="'+i+'" spellcheck="false">'+
-      '<span class="tc2">'+left+' of '+t.ids.length+' left</span>'+
-      '<span class="tools"><button data-add="'+i+'" title="Add a tier below">+</button>'+
-      (list.length>1?'<button data-del="'+i+'" title="Remove this tier">−</button>':'')+'</span></div>'+
-      '<div class="tzone" data-tier="'+i+'">'+
-      (t.ids.length?t.ids.map(id=>{
-        const p=POOL[id]; if(!p) return '';
-        const gone=tk.has(id);
-        return '<div class="pc'+(gone?' gone':'')+(mine.has(id)?' mine':'')+'" data-pid="'+id+'">'+
-          '<span class="ed" style="background:var(--'+p.pos+')"></span>'+
-          avatar(p,'sm')+
-          '<span class="t">'+esc(p.name)+'</span>'+
-          '<span class="m">'+esc(p.team)+' '+p.rank+'</span></div>';
-      }).join(''):'<span class="none">Drag players here</span>')+
-      '</div></div>';
-  }).join('');
-
-  return '<div class="tb-head"><div class="tb-cols">'+
-    POSITIONS.map(p=>'<button class="'+(tierPos===p?'on':'')+'" data-tp="'+p+'">'+lab(p)+'</button>').join('')+
-    '</div><button class="btn sm" id="bReTier">Rebuild from rankings</button>'+
-    '<span style="font-size:12px;color:var(--faint)">Drag to move a player. Struck-through names are gone.</span></div>'+
-    '<div class="tiers">'+rows+'</div>';
 }
 
 function boardView(){
@@ -1574,7 +1467,7 @@ function setupView(){
       '<button class="btn" id="bJoin">Join with a code</button></div></div>';
 
   const claimBlock = Sync.on ? '<div class="card sec"><h2>Your team</h2>'+
-    '<p class="h">Optional. Pick yours and the sidebar tracks your roster, bye weeks and tier pressure while you draft. It does not stop anyone else from picking.</p>'+
+    '<p class="h">Optional. Pick yours and the sidebar tracks your roster, open starting spots and bye weeks as you draft. It does not stop anyone else from picking.</p>'+
     '<div style="max-width:300px"><select id="whoSel">'+
     '<option value="">No team, just following along</option>'+
     S.order.map((tid,i)=>'<option value="'+tid+'" '+(mt===tid?'selected':'')+'>'+esc(S.teams[tid].name)+' (slot '+(i+1)+')</option>').join('')+
@@ -1604,7 +1497,7 @@ function setupView(){
     '<button class="btn" id="bSub" '+(locked?'disabled':'')+'>Remove a team</button></div>':'')+
     (locked?'<p class="h" style="margin-top:11px;color:var(--t2)">Picks are in, so the order is locked. Names can still change.</p>':'')+'</div>'+
 
-    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players loaded from a half PPR consensus board. Rankings move all summer, so paste a current list the week of the draft.</p>'+
+    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players available'+(poolExtended?', every skill-position player on an NFL roster':' — the wider list is still loading')+'. The top of the board follows a half PPR consensus; rankings move all summer, so paste a current list the week of the draft if you want it exact.</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="bImport">Import rankings</button>'+
     '<button class="btn" id="bPoolReset">Restore the built-in list</button></div></div>'+
 
@@ -1619,7 +1512,7 @@ function setupView(){
     '</div></div>'+
 
     '<div class="card sec"><h2>Practice run</h2>'+
-    '<p class="h">Try the whole thing before draft day. Nine simulated managers pick around you so you can see how the board, the tiers and the clock behave. It runs only on this device and never touches the real draft.</p>'+
+    '<p class="h">Try the whole thing before draft day. Nine simulated managers pick around you so you can see how the board and the clock behave. It runs only on this device and never touches the real draft.</p>'+
     '<div class="grid2" style="max-width:520px">'+
     '<div><label class="fl">Your draft slot</label><select id="mkSlot">'+
     Array.from({length:T()},(_,i)=>'<option value="'+(i+1)+'"'+(i===0?' selected':'')+'>Slot '+(i+1)+'</option>').join('')+
@@ -1679,13 +1572,12 @@ function confirmPick(pid){
   const o=atPick(), t=teamAt(o), c=canTake(t,p.pos);
   const lu=lineup(t);
   const clash=lu.starters.filter(s=>s.player&&s.player.bye===p.bye).length;
-  const ti=tierOf(pid);
   modal('<h3>Pick '+(o+1)+'</h3><p>Round '+roundOf(o)+', slot '+slotOf(o)+', '+esc(S.teams[t].name)+'</p>'+
     '<div class="pcard" style="display:flex;gap:12px;align-items:center">'+avatar(p,'lg')+
     '<div><div class="n">'+esc(p.name)+'</div><div class="m">'+
     '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span> '+esc(p.team)+
     ' · bye '+(p.bye||'none')+' · ranked '+p.rank+
-    (ti!==null?' · '+esc(TIERS[p.pos][ti].name):'')+'</div></div></div>'+
+    '</div></div></div>'+
     (!c.ok?'<p style="color:var(--live);margin-top:12px">'+esc(c.why)+'</p>':'')+
     (c.ok&&clash>=2?'<p style="color:var(--t2);margin-top:12px">Two starters already have bye week '+p.bye+'.</p>':'')+
     '<div class="row"><button class="btn" data-x>Cancel</button>'+
@@ -1718,7 +1610,7 @@ function importModal(){
     const norm=raw.split(/\r?\n/).map(l=>l.replace(/^\s*\d+[\.\)]?\s+/,'').split(/\s*[|,\t]\s*/).join('|')).join('\n');
     const t=parsePool(norm);
     if(t.length<20){ toast('Only read '+t.length+' players, check the format',1); return; }
-    S.poolText=norm; POOL=t; TIERS=buildTiers(); saveTiers(); saveLocal();
+    S.poolText=norm; POOL=t; saveLocal();
     if(Sync.on&&amCommish()) Sync.ref.child('poolText').set(norm);
     closeM(); render(); toast('Loaded '+t.length+' players');
   };
@@ -1824,7 +1716,7 @@ function keepFocus(){
   const key = a.id ? '#'+a.id
     : a.dataset.nm!==undefined ? '[data-nm="'+a.dataset.nm+'"]'
     : a.dataset.ow!==undefined ? '[data-ow="'+a.dataset.ow+'"]'
-    : a.dataset.rn!==undefined ? '[data-rn="'+a.dataset.rn+'"]' : null;
+    : null;
   if(!key) return null;
   return {key:key, s:a.selectionStart, e:a.selectionEnd, v:a.value};
 }
@@ -1840,7 +1732,6 @@ function render(){
   head();
   const m=$('#main');
   if(view==='draft') m.innerHTML=draftView();
-  else if(view==='tiers') m.innerHTML=tiersView();
   else if(view==='board') m.innerHTML=boardView();
   else if(view==='rosters') m.innerHTML=rostersView();
   else if(view==='setup') m.innerHTML=setupView();
@@ -1873,23 +1764,6 @@ function bind(){
   $$('[data-f]').forEach(b=>b.onclick=()=>{filterPos=b.dataset.f;selIdx=0;render();});
   const bc=$('#bCustom'); if(bc) bc.onclick=customModal;
   bindRows();
-
-  // tiers
-  $$('[data-tp]').forEach(b=>b.onclick=()=>{tierPos=b.dataset.tp;render();});
-  $$('[data-rn]').forEach(i=>i.onchange=()=>{ TIERS[tierPos][+i.dataset.rn].name=i.value; saveTiers(); });
-  $$('[data-add]').forEach(b=>b.onclick=()=>{ TIERS[tierPos].splice(+b.dataset.add+1,0,{name:'New tier',ids:[]}); saveTiers(); render(); });
-  $$('[data-del]').forEach(b=>b.onclick=()=>{
-    const i=+b.dataset.del, t=TIERS[tierPos];
-    if(t.length<2) return;
-    const move=t[i].ids; t.splice(i,1);
-    (t[Math.min(i,t.length-1)]).ids.push.apply(t[Math.min(i,t.length-1)].ids, move);
-    saveTiers(); render();
-  });
-  const rt=$('#bReTier'); if(rt) rt.onclick=()=>{ TIERS[tierPos]=autoTiers(tierPos); saveTiers(); render(); toast('Tiers rebuilt from the rankings'); };
-  if(view==='tiers'){
-    m.querySelectorAll('.pc').forEach(c=>{ c.onpointerdown=onDown; });
-    m.onpointermove=onMove; m.onpointerup=onUp; m.onpointercancel=onUp;
-  }
 
   // board
   $$('[data-ed]').forEach(c=>c.onclick=()=>{
@@ -1924,7 +1798,7 @@ function bind(){
   const ba=$('#bAdd'); if(ba) ba.onclick=()=>{ if(T()>=16){toast('Sixteen is the most',1);return;} S.teams.push({name:'Team '+(T()+1),owner:''}); S.order.push(T()-1); saveLocal(); if(Sync.on)Sync.pushMeta(); render(); };
   const bs=$('#bSub'); if(bs) bs.onclick=()=>{ if(T()<=2){toast('Need at least two',1);return;} const id=T()-1; S.teams.pop(); S.order=S.order.filter(x=>x!==id); saveLocal(); if(Sync.on)Sync.pushMeta(); render(); };
   const bi=$('#bImport'); if(bi) bi.onclick=importModal;
-  const bpr=$('#bPoolReset'); if(bpr) bpr.onclick=()=>{ S.poolText=null; POOL=parsePool(DEFAULT_POOL); TIERS=buildTiers(); saveTiers(); saveLocal(); render(); toast('Built-in list restored'); };
+  const bpr=$('#bPoolReset'); if(bpr) bpr.onclick=()=>{ S.poolText=null; POOL=parsePool(DEFAULT_POOL); extendPool(); saveLocal(); render(); toast('Built-in list restored'); };
   const bst=$('#bStart'); if(bst) bst.onclick=()=>{
     S.started=true; view='draft'; resetClock(); saveLocal();
     if(Sync.on) Sync.pushMeta();
@@ -1955,7 +1829,7 @@ function bind(){
   const td=$('#thDark'); if(td) td.onclick=()=>applyTheme('dark');
   const tl=$('#thLight'); if(tl) tl.onclick=()=>applyTheme('light');
   const ph=$('#phOn'); if(ph) ph.onchange=e=>{
-    if(e.target.checked){ put(LS+'_photos','on'); loadHeadshots(); toast('Photos on'); }
+    if(e.target.checked){ put(LS+'_photos','on'); toast('Photos on'); }
     else { put(LS+'_photos','off'); toast('Photos off, showing team logos'); }
     render();
   };
@@ -2036,10 +1910,9 @@ function boot(){
   if(!S.claims) S.claims={};
   if(!S.order||S.order.length!==S.teams.length) S.order=S.teams.map((t,i)=>i);
   POOL = parsePool(S.poolText||DEFAULT_POOL);
-  TIERS = loadTiers();
   view = S.started?'draft':'setup';
   resetClock(); render();
-  loadHeadshots();
+  loadRoster();
 
   $('#bTheme').onclick=flipTheme;
   $('#bClock').onclick=()=>{ if(!S.started){toast('Start the draft first',1);return;} clock.run?stopClock():startClock(); };
