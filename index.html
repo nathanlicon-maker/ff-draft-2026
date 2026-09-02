@@ -674,6 +674,18 @@ const TEAMLOGO = t => 'https://a.espncdn.com/i/teamlogos/nfl/500/'+String(t||'')
 const HEADSHOT = id => 'https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
 
 function keyName(n){ return String(n||'').toLowerCase().replace(/[^a-z]/g,''); }
+/* A looser key for when the two sources spell a name differently:
+   first initial plus surname, with suffixes dropped. */
+function altKey(n,pos){
+  let s=String(n||'').toLowerCase().replace(/[^a-z .'-]/g,'').trim();
+  s=s.replace(/\b(jr|sr|ii|iii|iv|v)\b\.?/g,'').trim();
+  const parts=s.split(/[ .]+/).filter(Boolean);
+  if(parts.length<2) return null;
+  const first=parts[0][0];
+  const last=parts[parts.length-1].replace(/[^a-z]/g,'');
+  if(!last) return null;
+  return first+last+'|'+pos;
+}
 function initials(n){
   const p=String(n||'').replace(/[^A-Za-z ]/g,'').trim().split(/\s+/);
   if(!p.length) return '?';
@@ -705,7 +717,7 @@ function avatar(pl, size){
    of the league. Cached afterwards, so it only happens once per device. */
 function loadRoster(){
   try{
-    const cached=get(LS+'_roster');
+    const cached=get(LS+'_roster2');
     if(cached){
       const c=JSON.parse(cached);
       Object.assign(HEAD,c.h||{});
@@ -715,6 +727,7 @@ function loadRoster(){
     }
   }catch(e){}
   reindexPool();
+  try{ localStorage.removeItem(LS+'_roster'); localStorage.removeItem(LS+'_heads'); }catch(e){}
   if(typeof fetch!=='function') return;
   fetch('https://api.sleeper.app/v1/players/nfl').then(r=>r.json()).then(all=>{
     const before=POOL.length;
@@ -722,7 +735,7 @@ function loadRoster(){
     headsReady=true;
     try{
       const x=POOL.slice(before).map(p=>[p.name,p.pos,p.team,p.bye]);
-      put(LS+'_roster', JSON.stringify({h:HEAD, x:x}));
+      put(LS+'_roster2', JSON.stringify({h:HEAD, x:x}));
     }catch(e){}
     render();
     toast(POOL.length+' players available');
@@ -796,6 +809,7 @@ function extendPool(all){
   POOL.forEach(p=>{ have[dkey(p.pos,p.name,p.team)]=1; });
   reindexPool();                                     // fills TEAMBYE from the core
   const extra=[];
+  const alt={};                                      // "j smith|RB" -> photo id, for near-misses
   Object.keys(all).forEach(id=>{
     const s=all[id];
     if(!s) return;
@@ -805,8 +819,16 @@ function extendPool(all){
     if(s.active===false) return;
     const name = pos==='DST' ? (s.team+' D/ST') : (s.full_name || ((s.first_name||'')+' '+(s.last_name||'')).trim());
     if(!name) return;
+    if(pos!=='DST'){
+      const a=altKey(name,pos);
+      if(a && !alt[a]) alt[a]=id;
+    }
     const k=dkey(pos,name,s.team);
-    if(have[k]) return;
+    if(have[k]){
+      // already on the ranked core — we still want the face
+      if(pos!=='DST' && !HEAD[keyName(name)]) HEAD[keyName(name)]=id;
+      return;
+    }
     have[k]=1;
     extra.push({
       name:name, pos:pos, team:s.team,
@@ -820,6 +842,14 @@ function extendPool(all){
   extra.forEach(e=>{
     if(e._id && e.pos!=='DST') HEAD[keyName(e.name)]=e._id;
     POOL.push({name:e.name,pos:e.pos,team:e.team,bye:e.bye});
+  });
+  // second pass for names the two sources spell differently, such as
+  // "J. Croskey-Merriweather" against "Jacory Croskey-Merriweather"
+  POOL.forEach(p=>{
+    if(p.pos==='DST') return;
+    if(HEAD[keyName(p.name)]) return;
+    const a=altKey(p.name,p.pos);
+    if(a && alt[a]) HEAD[keyName(p.name)]=alt[a];
   });
   reindexPool();
   poolExtended=true;
