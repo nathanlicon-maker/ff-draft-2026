@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NKL Draft Board</title>
 <meta name="theme-color" content="#0C110D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +74,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
   background:var(--bg);color:var(--tx);font-family:var(--ui);font-size:14px;line-height:1.45;transition:background .15s,color .15s;
   font-feature-settings:'tnum' 1,'cv05' 1;-webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
@@ -85,7 +86,7 @@ button{cursor:pointer;background:none;border:none}
 ::-webkit-scrollbar-thumb{background:var(--p3);border-radius:6px}
 h1,h2,h3,h4{font-family:var(--disp);font-weight:800;letter-spacing:-.015em;line-height:1.06}
 .sec h2,.mark h1{color:var(--head);text-transform:uppercase;letter-spacing:.005em}
-.wrap{max-width:1580px;margin:0 auto;padding:0 18px 90px}
+.wrap{max-width:1580px;margin:0 auto;padding:0 18px calc(90px + env(safe-area-inset-bottom))}
 
 /* ---------- controls ---------- */
 .btn{
@@ -101,6 +102,7 @@ h1,h2,h3,h4{font-family:var(--disp);font-weight:800;letter-spacing:-.015em;line-
 .btn.gh{background:transparent}
 input[type=text],input[type=number],input[type=password],select,textarea{
   background:var(--p1);border:1px solid var(--line);border-radius:var(--r);padding:10px 13px;color:var(--tx);width:100%;
+  font-size:16px;   /* anything smaller makes iOS zoom the page on focus */
 }
 input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--pill-live-bg)}
 textarea{font-family:var(--ui);resize:vertical}
@@ -239,7 +241,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .cl.new{animation:land .5s cubic-bezier(.2,1.4,.4,1)}
 
 /* ---------- rosters / setup ---------- */
-.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;margin-top:16px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:13px;margin-top:16px}
 .tc .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .tc .h h4{font-size:18px;font-weight:800}
 .tc .h .ow{font-size:11px;color:var(--faint);display:block;margin-top:2px}
@@ -250,7 +252,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .sec{padding:18px}
 .sec h2{font-size:20px;font-weight:800;margin-bottom:4px}
 .sec .h{font-size:13px;color:var(--dim);margin-bottom:15px;max-width:70ch}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:13px}
 .trow{display:grid;grid-template-columns:32px 1fr 1fr auto auto;gap:9px;align-items:center;margin-bottom:7px}
 .trow .no{font-family:var(--disp);font-weight:800;font-size:18px;text-align:center;background:var(--p2);border-radius:var(--r);padding:6px 0;line-height:1}
 .trow .mv{display:flex;gap:2px}
@@ -260,7 +262,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .roll{animation:rl .4s ease}
 @keyframes rl{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
 
-.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:13px;margin-top:16px}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,265px),1fr));gap:13px;margin-top:16px}
 .sb h4{font-size:16px;font-weight:800;margin-bottom:9px}
 .ln{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--line-2);font-size:12.5px}
 .ln:last-child{border:none}
@@ -280,14 +282,14 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pcard{border:1px solid var(--line);border-radius:var(--r);padding:13px;background:var(--p2)}
 .pcard .n{font-family:var(--disp);font-weight:800;font-size:25px;line-height:1.05}
 .pcard .m{font-size:12px;color:var(--dim);margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:300;background:var(--p1);border:1px solid var(--line);border-radius:99px;padding:9px 20px;font-size:13px;box-shadow:0 10px 34px var(--shadow);animation:up .28s ease}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:300;background:var(--p1);border:1px solid var(--line);border-radius:99px;padding:9px 20px;font-size:13px;box-shadow:0 10px 34px var(--shadow);animation:up .28s ease}
 @keyframes up{from{transform:translate(-50%,12px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 .toast.bad{border-color:var(--live);color:var(--live)}
 .stat{padding:14px}
 .stat .k{font-size:11.5px;color:var(--faint)}
 .stat .v{font-family:var(--disp);font-weight:800;font-size:31px;line-height:1.05;margin-top:3px}
 .stat .d{font-size:12px;color:var(--dim);margin-top:3px}
-.recap{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:13px}
+.recap{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:13px}
 
 
 /* ---------- player avatars ---------- */
@@ -358,14 +360,17 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
   font-size:12.5px;font-weight:600;color:var(--tx);background:var(--p1);
   border:1px solid var(--line);border-radius:99px;padding:3px 10px;max-width:38%;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;
+  display:flex;align-items:center;
 }
 .lane .duck{
-  position:absolute;top:50%;font-size:25px;line-height:1;z-index:4;
-  transform:translate(-50%,-50%);will-change:left;
+  position:absolute;top:50%;width:40px;height:28px;z-index:4;
+  transform:translate(-50%,-50%);will-change:left,transform;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.22));
 }
+.lane .duck svg{display:block;overflow:visible}
 .lane .wake{
-  position:absolute;top:50%;height:3px;border-radius:2px;z-index:2;
-  background:linear-gradient(90deg,transparent,var(--water-c));transform:translateY(-50%);
+  position:absolute;top:calc(50% + 7px);height:3px;border-radius:2px;z-index:2;
+  background:linear-gradient(90deg,transparent,var(--water-c));transform:translateY(-50%);opacity:.85;
 }
 .lane .place{
   position:absolute;right:9px;top:50%;transform:translateY(-50%);z-index:5;
@@ -390,6 +395,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .res-row:last-child{border-bottom:none}
 .res-row .p{font-family:var(--disp);font-weight:800;font-size:17px;color:var(--head);text-align:center}
 .res-row .n{font-weight:600}
+.dot-c{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
 .res-row .t{font-size:12px;color:var(--faint)}
 :root,[data-theme="dark"]{--water-a:#12212B;--water-b:#0D1922;--water-c:#2C4C60}
 [data-theme="light"]{--water-a:#DCEEF7;--water-b:#C9E4F2;--water-c:#9FCDE4}
@@ -397,26 +403,111 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 @media(max-width:1120px){
   .dgrid{grid-template-columns:1fr}
   .rail{position:static;flex-direction:row;flex-wrap:wrap}
-  .rail>.card{flex:1;min-width:265px}
+  .rail>.card{flex:1;min-width:min(100%,265px)}
   .pool{max-height:none}
 }
+
+/* ---------- tablets and large phones ---------- */
 @media(max-width:760px){
-  .hin{grid-template-columns:1fr auto;row-gap:9px}
-  .clockbar{grid-column:1/-1;order:3;justify-content:space-between}
+  .wrap{padding:0 12px calc(80px + env(safe-area-inset-bottom))}
+  .hin{grid-template-columns:1fr auto;row-gap:9px;padding:9px 12px}
+  .clockbar{grid-column:1/-1;order:3;justify-content:flex-start}
+  .otc{width:100%}
   .mark h1{font-size:18px}
-  .otc .nm{font-size:16px;max-width:42vw}
-  .pr{grid-template-columns:32px 1fr 46px 56px;gap:8px}
-  .pr .by,.pr .st{display:none}
-  .wrap{padding:0 12px 80px}
-  .lane .tag{max-width:44%;font-size:11.5px}
-  .lane .duck{font-size:21px}
+  .mark .fmt{font-size:11px}
+  .otc .nm{font-size:16px;max-width:46vw}
+  nav{padding:0 12px}
+  nav button{padding:11px 13px}
+
+  /* avatar, name, position, bye — the spacer column goes */
+  .pr{grid-template-columns:34px minmax(0,1fr) 46px 58px;gap:9px;padding:10px 12px}
+  .pr .st{display:none}
+  .pr .nm{font-size:14px}
+
+  .boardtop,.race-top{margin:14px 0 11px}
+  .boardtop h2,.race-top h2{font-size:23px}
+  .counts,.race-actions{margin-left:0;width:100%}
+
+  .btn{padding:11px 15px}          /* comfortable to tap */
+  .btn.sm{padding:9px 12px}
+  .fl-row button,.tb-cols button{padding:10px 14px}
+
+  .lane{height:48px}
+  .lane .tag{max-width:40%;font-size:11.5px;padding:2px 8px}
+  .lane .duck{width:36px;height:25px}
+  .finish{right:34px}
+  .lane .place{right:5px;font-size:13px;padding:2px 8px}
+  .countdown{font-size:60px}
+
+  .scrim{padding:12px}
+  .modal{padding:18px;max-height:90vh}
+  .modal h3{font-size:19px}
+
   .trow{grid-template-columns:28px minmax(0,1fr) auto;grid-template-rows:auto auto;row-gap:5px}
   .trow .no{grid-column:1;grid-row:1/3;display:flex;align-items:center;justify-content:center}
   .trow input:nth-of-type(1){grid-column:2;grid-row:1}
   .trow input:nth-of-type(2){grid-column:2;grid-row:2}
   .trow .mv{grid-column:3;grid-row:1/3;align-items:center}
   .trow .cl2{grid-column:2;grid-row:3}
+  .sec{padding:15px}
+  .sec h2{font-size:18px}
 }
+
+/* ---------- phones ---------- */
+@media(max-width:480px){
+  .wrap{padding:0 10px calc(76px + env(safe-area-inset-bottom))}
+  .hin{padding:8px 10px;gap:10px}
+  .mark h1{font-size:16px}
+  .mark .fmt{display:none}
+  .hact{gap:6px}
+  nav{padding:0 10px}
+  nav button{font-size:13px;padding:11px 11px}
+
+  .otc{padding:6px 12px}
+  .otc .nm{font-size:15px;max-width:40vw}
+  .pk b{font-size:19px}
+  .pk{padding-left:10px;font-size:10.5px}
+
+  .phead{gap:7px}
+  .sw{min-width:100%}
+  .fl-row{width:100%}
+  .fl-row button{flex:1;padding:10px 6px;font-size:12px}
+  .pr{grid-template-columns:32px minmax(0,1fr) 44px;gap:9px;padding:11px 10px}
+  .pr .by{display:none}
+  .pr .sub{font-size:11px}
+
+  .boardtop h2,.race-top h2{font-size:20px}
+  .cpill{font-size:11.5px;padding:5px 10px}
+  .tk{min-width:126px}
+
+  .card{padding:13px;border-radius:12px}
+  .sl{grid-template-columns:38px minmax(0,1fr) auto;font-size:12px}
+  .stat .v{font-size:26px}
+
+  .lane{height:44px}
+  .lane .tag{max-width:34%;font-size:10.5px;padding:2px 7px;left:6px}
+  .lane .duck{width:31px;height:22px}
+  .finish{right:28px;width:7px}
+  .lane .place{right:4px;font-size:12px;padding:1px 7px}
+  .countdown{font-size:48px}
+  .res-row{grid-template-columns:34px minmax(0,1fr) auto;gap:9px;padding:9px 10px}
+
+  .mockbar{padding:9px 11px;gap:9px}
+  .mockbar .txt{min-width:100%}
+
+  /* the big board stays scrollable but each column gets narrower */
+  .bb{min-width:760px}
+  .cl{min-height:46px;padding:5px 7px}
+  .cl .nm{font-size:11.5px}
+  .cl .mt{font-size:9.5px}
+  .brow{grid-template-columns:32px repeat(var(--tc2),minmax(0,1fr));gap:3px}
+}
+
+/* short screens: give the list more room by letting the header scroll away */
+@media(max-height:560px) and (max-width:900px){
+  header{position:static}
+}
+
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1281,6 +1372,29 @@ function mockTick(){
 /* After the human picks, hand control back to the simulated managers. */
 function mockAfterHuman(){ if(MOCK.on) mockTick(); }
 /* ---------- 10. PICK ACTIONS is below ---------- */
+/* One duck per team, each a different colour and all facing the finish
+   line. Drawn rather than an emoji, because the emoji duck faces the
+   wrong way and cannot be recoloured. */
+const DUCK_COLORS = [
+  '#E4572E', '#C9950A', '#7FB800', '#17BEBB', '#3D7DCA',
+  '#8C5BD1', '#E3628A', '#B5651D', '#5B6B8C', '#2E9E5B'
+];
+function duckColor(i){ return DUCK_COLORS[i % DUCK_COLORS.length]; }
+function duckSVG(i){
+  const c = duckColor(i);
+  return '<svg viewBox="0 0 46 32" width="100%" height="100%" aria-hidden="true">'+
+    '<g stroke="rgba(0,0,0,.30)" stroke-width="1">'+
+      '<path d="M9 17 L1 10 L11 15 Z" fill="'+c+'"/>'+            /* tail */
+      '<ellipse cx="18" cy="21" rx="13" ry="7.5" fill="'+c+'"/>'+ /* body */
+      '<path d="M26 20 Q27.5 10 31 9" stroke="'+c+'" stroke-width="6.5" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="32" cy="9" r="5.6" fill="'+c+'"/>'+            /* head */
+    '</g>'+
+    '<path d="M37 7.6 L44 10 L37 11.6 Z" fill="#F5A623" stroke="rgba(0,0,0,.28)" stroke-width="0.8"/>'+
+    '<circle cx="33.6" cy="7.4" r="1.35" fill="#10161A"/>'+
+    '<path d="M12 24 q6 3 12 0" stroke="rgba(255,255,255,.35)" stroke-width="1.6" fill="none" stroke-linecap="round"/>'+
+  '</svg>';
+}
+
 /* ============================================================
    DUCK RACE — decides the draft order.
 
@@ -1572,31 +1686,30 @@ function raceView(){
     (started?'<span class="raceclock" id="raceClock">0.0s</span>':'')+
     (cm
       ? (started
-          ? '<button class="btn" id="raceAgain">Race again</button>'+
+          ? '<button class="btn" id="raceReset">Reset</button>'+
+            '<button class="btn" id="raceAgain">Race again</button>'+
             '<button class="btn key" id="raceApply" disabled>Use as draft order</button>'
           : '<button class="btn key" id="raceGo">Start the race</button>')
       : (started?'':'<span style="font-size:13px;color:var(--dim)">Waiting for the commissioner to start it.</span>'))+
     '</div></div>';
 
-  if(!started){
-    return head+'<div class="card" style="padding:26px;text-align:center">'+
-      '<div style="font-size:40px;line-height:1">\u{1F986}</div>'+
-      '<p style="margin-top:10px;color:var(--dim);font-size:13.5px;max-width:52ch;margin-left:auto;margin-right:auto">'+
-      'One duck per team, thirty seconds, first across the line picks first. '+
-      'Set your team names on the Setup tab before you run it, then start the race and everyone watches together.</p></div>';
-  }
-
+  /* The pond is always on screen. With no race running the ducks simply
+     sit on the starting line, which is also where Reset puts them. */
   const lanes=S.teams.map((t,i)=>
     '<div class="lane" data-lane="'+i+'">'+
       '<div class="ripple"></div>'+
       '<div class="finish"></div>'+
       '<div class="wake" data-wake="'+i+'" style="left:0;width:0"></div>'+
-      '<div class="duck" data-duck="'+i+'" style="left:0">\u{1F986}</div>'+
-      '<span class="tag">'+esc(teamName(i))+'</span>'+
+      '<div class="duck" data-duck="'+i+'" style="left:26px">'+duckSVG(i)+'</div>'+
+      '<span class="tag" style="border-color:'+duckColor(i)+'">'+
+        '<span class="dot-c" style="background:'+duckColor(i)+'"></span>'+esc(teamName(i))+'</span>'+
       '<span class="place" data-place="'+i+'"></span>'+
     '</div>').join('');
 
-  return head+'<div class="pond" id="pond">'+lanes+
+  return head+
+    (started?'':'<p style="font-size:13px;color:var(--dim);margin:0 0 11px">'+
+      (cm?'Ducks are on the line. Start when everyone is watching.':'Ducks are on the line, waiting for the commissioner.')+'</p>')+
+    '<div class="pond" id="pond">'+lanes+
     '<div class="countdown" id="cdown" style="display:none"></div></div>'+
     '<div class="card results" id="raceRes" style="display:none"></div>';
 }
@@ -1658,7 +1771,7 @@ function showRaceResults(){
     order.map((tid,i)=>{
       const l=RACE.lanes.find(x=>x.team===tid);
       return '<div class="res-row"><span class="p">'+(i+1)+'</span>'+
-        '<span class="n">'+esc(teamName(tid))+'</span>'+
+        '<span class="n"><span class="dot-c" style="background:'+duckColor(tid)+'"></span>'+esc(teamName(tid))+'</span>'+
         '<span class="t">'+l.finish.toFixed(2)+'s</span></div>';
     }).join('');
   const ap=document.getElementById('raceApply');
@@ -2142,6 +2255,7 @@ function bind(){
   // duck race
   const rg=$('#raceGo');    if(rg) rg.onclick=startRace;
   const ra=$('#raceAgain'); if(ra) ra.onclick=()=>{ clearRace(); setTimeout(startRace,60); };
+  const rr=$('#raceReset'); if(rr) rr.onclick=()=>{ clearRace(); toast('Ducks back on the line'); };
   const rp=$('#raceApply'); if(rp) rp.onclick=applyRaceOrder;
 
   // practice run
