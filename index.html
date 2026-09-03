@@ -186,6 +186,12 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pr:hover .st,.pr .st.on{opacity:1}
 .pr .st.on{color:var(--t3)}
 .pr.no{opacity:.32}
+/* drafted, but still listed so a late search finds them */
+.pr.taken{opacity:.5}
+.pr.taken .nm{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--faint)}
+.pr.taken .sub{color:var(--live);font-weight:600}
+.pr.taken .av{filter:grayscale(1) opacity(.75)}
+.pr.taken .pos{filter:grayscale(.7)}
 .empty{padding:36px 20px;text-align:center;color:var(--faint)}
 
 /* ---------- right rail ---------- */
@@ -1073,6 +1079,21 @@ function rosterOf(t){
   return r;
 }
 const posCount = (t,pos) => rosterOf(t).filter(p=>p.pos===pos).length;
+
+/* Who took a player, and at which pick. Drafted players stay on the
+   board rather than vanishing, so someone hunting for a name late on
+   finds out he is gone instead of assuming they typed it wrong. */
+function draftedBy(pid){
+  const target = POOL[pid];
+  if(!target) return null;
+  for(let i=0;i<S.picks.length;i++){
+    const pk=S.picks[i];
+    if(pk.pid===pid) return {at:i, team:teamAt(i)};
+    const pl=playerOf(pk);
+    if(pl && dkey(pl.pos,pl.name,pl.team)===dkey(target.pos,target.name,target.team)) return {at:i, team:teamAt(i)};
+  }
+  return null;
+}
 function canTake(t,pos){
   const r=rosterOf(t);
   if(r.length>=ROSTER) return {ok:false,why:'This roster is full'};
@@ -1573,14 +1594,19 @@ function ticker(){
 function poolRows(){
   const o=atPick(), t=(S.started&&!over())?teamAt(o):null;
   const tk=takenSet(), q=query.trim().toLowerCase();
+  /* Drafted players are NOT filtered out. Someone searching a name in
+     the thirteenth round should be told he has gone, not left staring
+     at an empty list wondering how to spell it. */
   let list=POOL.filter(p=>{
-    if(tk.has(p.id)) return false;
     if(filterPos!=='ALL'&&p.pos!==filterPos) return false;
     if(q && !(p.name+' '+p.team+' '+lab(p.pos)).toLowerCase().includes(q)) return false;
     return true;
   });
-  /* Alphabetical, so the order of the list gives nothing away either. */
+  /* Alphabetical, so the order of the list gives nothing away either.
+     Available names sort above ones already taken. */
   list.sort((a,c)=>{
+    const ga=tk.has(a.id)?1:0, gc=tk.has(c.id)?1:0;
+    if(ga!==gc) return ga-gc;
     const an=a.name.replace(/^[^A-Za-z]+/,''), cn=c.name.replace(/^[^A-Za-z]+/,'');
     return an.localeCompare(cn);
   });
@@ -1590,12 +1616,18 @@ function poolRows(){
   const byes={};
   if(mt!==null) lineup(mt).starters.forEach(s=>{ if(s.player&&s.player.bye) byes[s.player.bye]=(byes[s.player.bye]||0)+1; });
   const html = list.slice(0,400).map((p,i)=>{
-    const bad = t!==null && !canTake(t,p.pos).ok;
-    return '<div class="pr'+(i===selIdx?' sel':'')+(bad?' no':'')+'" data-pid="'+p.id+'">'+
+    const gone = tk.has(p.id);
+    const bad = !gone && t!==null && !canTake(t,p.pos).ok;
+    let sub = esc(p.team);
+    if(gone){
+      const d=draftedBy(p.id);
+      sub = d ? 'Taken '+code(d.at)+' by '+esc(teamName(d.team)) : 'Already drafted';
+    }
+    return '<div class="pr'+(i===selIdx?' sel':'')+(bad?' no':'')+(gone?' taken':'')+'" data-pid="'+p.id+'">'+
       avatar(p)+
-      '<div><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc(p.team)+'</div></div>'+
+      '<div><div class="nm">'+esc(p.name)+'</div><div class="sub">'+sub+'</div></div>'+
       '<span class="pos '+p.pos+'">'+lab(p.pos)+'</span>'+
-      '<span class="by'+(byes[p.bye]>=2?' hit':'')+'">'+(p.bye?'Bye '+p.bye:'—')+'</span>'+
+      '<span class="by'+(byes[p.bye]>=2?' hit':'')+'">'+(gone?'—':(p.bye?'Bye '+p.bye:'—'))+'</span>'+
       '<span class="st"></span></div>';
   }).join('');
   return {html:html,list:list};
@@ -1955,6 +1987,23 @@ function closeM(){ $('#ov').innerHTML=''; }
 
 function confirmPick(pid){
   const p=POOL[pid]; if(!p) return;
+
+  /* Already gone: say so plainly, with the pick number and the team, so
+     nobody stands there retyping a name that was never the problem. */
+  if(takenSet().has(pid)){
+    const d=draftedBy(pid);
+    modal('<h3>Already drafted</h3>'+
+      '<p>Nothing wrong with your spelling. This one is gone.</p>'+
+      '<div class="pcard" style="display:flex;gap:12px;align-items:center">'+avatar(p,'lg')+
+      '<div><div class="n">'+esc(p.name)+'</div><div class="m">'+
+      '<span class="pos '+p.pos+'">'+lab(p.pos)+'</span> '+esc(p.team)+
+      (d?' · taken at '+code(d.at)+' by '+esc(teamName(d.team)):'')+
+      '</div></div></div>'+
+      '<div class="row"><button class="btn key" data-x>Pick someone else</button></div>');
+    ping(320,.16,.07);
+    return;
+  }
+
   const o=atPick(), t=teamAt(o), c=canTake(t,p.pos);
   const lu=lineup(t);
   const clash=lu.starters.filter(s=>s.player&&s.player.bye===p.bye).length;
