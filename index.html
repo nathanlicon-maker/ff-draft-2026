@@ -307,7 +307,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .av.lg{width:56px;height:56px}
 .av.lg .mono{font-size:20px}
 .av .ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 2px var(--pc,transparent)}
-.pr{grid-template-columns:34px 40px 1fr 46px 62px 30px}
+.pr{grid-template-columns:40px 1fr 48px 66px 24px}
 .pc .av{margin-right:1px}
 .cl .av{position:absolute;right:5px;bottom:5px;width:22px;height:22px;opacity:.9}
 .cl .nm{padding-right:26px}
@@ -348,7 +348,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
   .mark h1{font-size:18px}
   .otc .nm{font-size:16px;max-width:42vw}
   .tm{font-size:21px;min-width:74px}
-  .pr{grid-template-columns:30px 32px 1fr 44px 52px;gap:8px}
+  .pr{grid-template-columns:32px 1fr 46px 56px;gap:8px}
   .pr .by,.pr .st{display:none}
   .wrap{padding:0 12px 80px}
   .trow{grid-template-columns:28px minmax(0,1fr) auto;grid-template-rows:auto auto;row-gap:5px}
@@ -1307,9 +1307,8 @@ function ticker(){
   if(!S.picks.length) return '';
   return '<div class="tick">'+S.picks.map((p,i)=>({p,i})).slice(-14).reverse().map(({p,i})=>{
     const pl=playerOf(p), t=S.teams[teamAt(i)];
-    const d = pl.rank<9999 ? pl.rank-(i+1) : 0;
     return '<div class="tk'+(i===flash?' fresh':'')+'"><span class="e" style="background:var(--'+pl.pos+')"></span>'+
-      '<div class="a"><span>'+code(i)+'</span><span>'+(d>=12?'+'+d:d<=-14?d:'')+'</span></div>'+
+      '<div class="a"><span>'+code(i)+'</span><span>'+lab(pl.pos)+'</span></div>'+
       '<div class="b">'+esc(pl.name)+'</div><div class="c">'+esc(t.name)+'</div></div>';
   }).join('')+'</div>';
 }
@@ -1323,19 +1322,23 @@ function poolRows(){
     if(q && !(p.name+' '+p.team+' '+lab(p.pos)).toLowerCase().includes(q)) return false;
     return true;
   });
+  /* Alphabetical on purpose. Sorting by a consensus ranking would hand
+     everyone a cheat sheet, which is exactly what we are avoiding. */
+  list.sort((a,c)=>{
+    const an=a.name.replace(/^[^A-Za-z]+/,''), cn=c.name.replace(/^[^A-Za-z]+/,'');
+    return an.localeCompare(cn);
+  });
   if(selIdx>=list.length) selIdx=0;
   if(!list.length) return {html:'<div class="empty">Nobody matches that search.</div>',list:list};
   const mt = myTeam();
   const byes={};
   if(mt!==null) lineup(mt).starters.forEach(s=>{ if(s.player&&s.player.bye) byes[s.player.bye]=(byes[s.player.bye]||0)+1; });
-  const html = list.slice(0,280).map((p,i)=>{
+  const html = list.slice(0,400).map((p,i)=>{
     const bad = t!==null && !canTake(t,p.pos).ok;
-    const d = p.rank-(o+1);
     return '<div class="pr'+(i===selIdx?' sel':'')+(bad?' no':'')+'" data-pid="'+p.id+'">'+
-      '<span class="rk">'+p.rank+'</span>'+
       avatar(p)+
       '<div><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc(p.team)+'</div></div>'+
-      '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span>'+
+      '<span class="pos '+p.pos+'">'+lab(p.pos)+'</span>'+
       '<span class="by'+(byes[p.bye]>=2?' hit':'')+'">'+(p.bye?'Bye '+p.bye:'—')+'</span>'+
       '<span class="st"></span></div>';
   }).join('');
@@ -1382,11 +1385,6 @@ function draftView(){
   const run=posRun();
   if(run) rail += '<div class="card"><div class="note hot">'+run.n+' of the last '+run.of+' picks were '+lab(run.pos)+'s.</div></div>';
 
-  rail += '<div class="card"><h3>Best left</h3>'+POSITIONS.map(p=>{
-    const pl=POOL.find(x=>x.pos===p&&!tk.has(x.id));
-    return pl?'<div class="ba" data-pid="'+pl.id+'"><span class="pos '+p+'">'+lab(p)+'</span><span class="n">'+esc(pl.name)+'</span><span class="r">'+pl.rank+'</span></div>':'';
-  }).join('')+'</div>';
-
   if(!live) rail = '<div class="card"><h3>'+(over()?'Draft complete':'Not started')+'</h3><p style="font-size:13px;color:var(--dim)">'+
     (over()?'The full results are on the Rosters tab.':'Set your teams and order on the Setup tab, then start the draft.')+
     '</p><div style="margin-top:12px"><button class="btn key" data-go="'+(over()?'rosters':'setup')+'">'+(over()?'See rosters':'Go to setup')+'</button></div></div>';
@@ -1407,7 +1405,7 @@ function draftView(){
 
   const tk2=takenSet().size + S.picks.filter(p=>p.custom).length;
   const top='<div class="boardtop"><div><h2>Draft board</h2>'+
-    '<div class="sub">Search a name and press Enter, or click a row to draft.</div></div>'+
+    '<div class="sub">Alphabetical, no rankings. Search a name and press Enter, or click a row to draft.</div></div>'+
     '<div class="counts">'+
     '<span class="cpill">'+POOL.length+' total</span>'+
     '<span class="cpill live">'+(POOL.length-takenSet().size)+' available</span>'+
@@ -1451,13 +1449,11 @@ function boardView(){
 function rostersView(){
   let recap='';
   if(S.picks.length){
-    const v=S.picks.map((p,i)=>{const pl=playerOf(p);return pl&&pl.rank<9999?pl.rank-(i+1):-999;});
-    const bi=v.indexOf(Math.max.apply(null,v)), bp=playerOf(S.picks[bi]);
     const mix={}; S.picks.forEach(p=>{const pl=playerOf(p); if(pl) mix[pl.pos]=(mix[pl.pos]||0)+1;});
     recap='<div class="recap"><div class="card stat"><div class="k">Picks made</div><div class="v">'+S.picks.length+'</div>'+
       '<div class="d">'+POSITIONS.filter(p=>mix[p]).map(p=>lab(p)+' '+mix[p]).join(', ')+'</div></div>'+
-      '<div class="card stat"><div class="k">Best value so far</div><div class="v" style="font-size:22px">'+esc(bp.name)+'</div>'+
-      '<div class="d">Ranked '+bp.rank+', went at '+(bi+1)+' to '+esc(S.teams[teamAt(bi)].name)+'</div></div>'+
+      '<div class="card stat"><div class="k">Rounds done</div><div class="v">'+Math.floor(S.picks.length/T())+'<span style="font-size:15px;color:var(--faint)"> of '+S.rounds+'</span></div>'+
+      '<div class="d">'+(totalPicks()-S.picks.length)+' picks remaining</div></div>'+
       '<div class="card stat"><div class="k">Results</div><div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap">'+
       '<button class="btn sm" id="eCSV">Download CSV</button></div>'+
       '<div class="d" style="margin-top:8px">Every pick in order, ready to enter in ESPN.</div></div></div>';
@@ -1527,7 +1523,7 @@ function setupView(){
     '<button class="btn" id="bSub" '+(locked?'disabled':'')+'>Remove a team</button></div>':'')+
     (locked?'<p class="h" style="margin-top:11px;color:var(--t2)">Picks are in, so the order is locked. Names can still change.</p>':'')+'</div>'+
 
-    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players available'+(poolExtended?', every skill-position player on an NFL roster':' — the wider list is still loading')+'. The top of the board follows a half PPR consensus; rankings move all summer, so paste a current list the week of the draft if you want it exact.</p>'+
+    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players available'+(poolExtended?', every skill-position player on an NFL roster':' — the wider list is still loading')+'. The list is alphabetical and carries no rankings or projections, so come prepared with your own board.</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="bImport">Import rankings</button>'+
     '<button class="btn" id="bPoolReset">Restore the built-in list</button></div></div>'+
 
@@ -1605,8 +1601,8 @@ function confirmPick(pid){
   modal('<h3>Pick '+(o+1)+'</h3><p>Round '+roundOf(o)+', slot '+slotOf(o)+', '+esc(S.teams[t].name)+'</p>'+
     '<div class="pcard" style="display:flex;gap:12px;align-items:center">'+avatar(p,'lg')+
     '<div><div class="n">'+esc(p.name)+'</div><div class="m">'+
-    '<span class="pos '+p.pos+'">'+lab(p.pos)+p.posRank+'</span> '+esc(p.team)+
-    ' · bye '+(p.bye||'none')+' · ranked '+p.rank+
+    '<span class="pos '+p.pos+'">'+lab(p.pos)+'</span> '+esc(p.team)+
+    ' · bye '+(p.bye||'none')+
     '</div></div></div>'+
     (!c.ok?'<p style="color:var(--live);margin-top:12px">'+esc(c.why)+'</p>':'')+
     (c.ok&&clash>=2?'<p style="color:var(--t2);margin-top:12px">Two starters already have bye week '+p.bye+'.</p>':'')+
@@ -1723,10 +1719,10 @@ function showLink(u){
 }
 
 function exportCSV(){
-  const rows=[['Overall','Round','Slot','Team','Manager','Player','Position','NFL','Bye','Rank']];
+  const rows=[['Overall','Round','Slot','Team','Manager','Player','Position','NFL','Bye']];
   S.picks.forEach((p,i)=>{
     const pl=playerOf(p), t=S.teams[teamAt(i)];
-    rows.push([i+1,roundOf(i),slotOf(i),t.name,t.owner||'',pl.name,lab(pl.pos),pl.team,pl.bye||'',pl.rank<9999?pl.rank:'']);
+    rows.push([i+1,roundOf(i),slotOf(i),t.name,t.owner||'',pl.name,lab(pl.pos),pl.team,pl.bye||'']);
   });
   const csv=rows.map(r=>r.map(c=>/[",\n]/.test(String(c))?'"'+String(c).replace(/"/g,'""')+'"':c).join(',')).join('\n');
   const a=document.createElement('a');
