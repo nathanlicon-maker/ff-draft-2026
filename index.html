@@ -628,6 +628,7 @@ const SCORING = {
 
 /* ---------- 3. GLOBALS ---------- */
 const LS = 'draftroom26';
+const RESET_PIN = 'DDO';   // required to clear the board mid-draft
 let POOL = [], S = null;
 let view = 'setup', filterPos = 'ALL', query = '', selIdx = 0;
 let flash = null, me = null;
@@ -873,6 +874,20 @@ const totalPicks = () => S.rounds*T();
 const atPick = () => S.picks.length;
 const over = () => atPick() >= totalPicks();
 const code = o => roundOf(o)+'.'+String(slotOf(o)).padStart(2,'0');
+
+/* The reigning champion gets a crown. It is decoration only, added when
+   a name is drawn, never stored, so editing the team name or the manager
+   cannot break it and the crown never ends up in the export. */
+const CHAMP_MANAGER = 'nate';
+function isChamp(teamId){
+  const t=S.teams[teamId];
+  return !!(t && String(t.owner||'').trim().toLowerCase()===CHAMP_MANAGER);
+}
+function teamName(teamId){
+  const t=S.teams[teamId];
+  if(!t) return '';
+  return (isChamp(teamId)?'\u265B ':'')+t.name;
+}
 
 /* ---------- 6. DERIVED ---------- */
 /* A pick carries the player's own details, not just a pool index.
@@ -1266,7 +1281,7 @@ function head(){
   } else {
     const t=teamAt(o), mine=(myTeam()===t);
     $('#otcLbl').textContent = mine ? 'Your pick' : 'On the clock';
-    $('#otcName').textContent = S.teams[t].name;
+    $('#otcName').textContent = teamName(t);
     $('#pkBig').textContent = code(o);
     $('#pkSm').textContent = 'pick '+(o+1)+' of '+totalPicks();
     otc.className='otc live'+(mine?' mine':'');
@@ -1286,7 +1301,7 @@ function ticker(){
     const pl=playerOf(p), t=S.teams[teamAt(i)];
     return '<div class="tk'+(i===flash?' fresh':'')+'"><span class="e" style="background:var(--'+pl.pos+')"></span>'+
       '<div class="a"><span>'+code(i)+'</span><span>'+lab(pl.pos)+'</span></div>'+
-      '<div class="b">'+esc(pl.name)+'</div><div class="c">'+esc(t.name)+'</div></div>';
+      '<div class="b">'+esc(pl.name)+'</div><div class="c">'+esc(teamName(teamAt(i)))+'</div></div>';
   }).join('')+'</div>';
 }
 
@@ -1299,9 +1314,11 @@ function poolRows(){
     if(q && !(p.name+' '+p.team+' '+lab(p.pos)).toLowerCase().includes(q)) return false;
     return true;
   });
-  /* Ordered by ADP, but the number is never shown. The board still puts
-     the likely picks near the top; it just will not tell anyone by how
-     much, so you cannot read a ranking off the screen. */
+  /* Alphabetical, so the order of the list gives nothing away either. */
+  list.sort((a,c)=>{
+    const an=a.name.replace(/^[^A-Za-z]+/,''), cn=c.name.replace(/^[^A-Za-z]+/,'');
+    return an.localeCompare(cn);
+  });
   if(selIdx>=list.length) selIdx=0;
   if(!list.length) return {html:'<div class="empty">Nobody matches that search.</div>',list:list};
   const mt = myTeam();
@@ -1332,7 +1349,7 @@ function draftView(){
     const lu=lineup(focus), left=picksLeft(focus), miss=openStarters(focus);
     const need=Object.values(miss).reduce((a,b)=>a+b,0);
     const np=nextPickFor(focus);
-    rail += '<div class="card"><h3>'+esc(S.teams[focus].name)+'<small>'+
+    rail += '<div class="card"><h3>'+esc(teamName(focus))+'<small>'+
       (mt===focus?'your team':'on the clock')+'</small></h3><div class="slots">'+
       lu.starters.map(s=>s.player
         ? '<div class="sl"><span class="k">'+s.slot+'</span><span class="v">'+esc(s.player.name)+'</span><span class="b">'+(s.player.bye||'')+'</span></div>'
@@ -1353,7 +1370,7 @@ function draftView(){
   if(live) rail += '<div class="card"><h3>Order</h3>'+upn.map((i,k)=>{
     const tid=teamAt(i), cl=(S.claims||{})[tid];
     return '<div class="qn'+(tid===mt?' you':'')+'"><span class="p">'+(k===0?'now':code(i))+'</span>'+
-      '<span class="n">'+esc(S.teams[tid].name)+'</span>'+(cl?'<span class="on">here</span>':'')+'</div>';
+      '<span class="n">'+esc(teamName(tid))+'</span>'+(cl?'<span class="on">here</span>':'')+'</div>';
   }).join('')+'</div>';
 
   const run=posRun();
@@ -1386,7 +1403,7 @@ function draftView(){
     '<span class="cpill">'+S.picks.length+' drafted</span></div></div>';
 
   return top+ticker()+mockBar+'<div class="dgrid"><section>'+
-    (turn?'<div class="note" style="margin-bottom:11px">Waiting on '+esc(S.teams[teamAt(o)].name)+'. You will be able to pick when your turn comes.</div>':'')+
+    (turn?'<div class="note" style="margin-bottom:11px">Waiting on '+esc(teamName(teamAt(o)))+'. You will be able to pick when your turn comes.</div>':'')+
     '<div class="phead"><div class="sw"><span class="i">⌕</span>'+
     '<input type="text" id="q" placeholder="Search a player, then press Enter to draft" value="'+esc(query)+'" autocomplete="off"></div>'+
     '<div class="fl-row">'+['ALL'].concat(POSITIONS).map(p=>'<button class="'+(filterPos===p?'on':'')+'" data-f="'+p+'">'+(p==='ALL'?'All':lab(p))+'</button>').join('')+'</div>'+
@@ -1397,7 +1414,7 @@ function draftView(){
 function boardView(){
   const cur=atPick();
   const hdr='<div class="brow bhdr"><div></div>'+S.order.map((tid,i)=>
-    '<div class="th">'+esc(S.teams[tid].name)+'<span class="s2">Slot '+(i+1)+'</span></div>').join('')+'</div>';
+    '<div class="th">'+esc(teamName(tid))+'<span class="s2">Slot '+(i+1)+'</span></div>').join('')+'</div>';
   let out=hdr;
   for(let r=1;r<=S.rounds;r++){
     if(r>1&&(r-1)%5===0) out+=hdr;
@@ -1436,7 +1453,7 @@ function rostersView(){
     const t=S.teams[tid], lu=lineup(tid), bt={};
     lu.starters.forEach(s=>{ if(s.player&&s.player.bye) bt[s.player.bye]=(bt[s.player.bye]||0)+1; });
     const bs=Object.keys(bt).sort((a,b)=>a-b);
-    return '<div class="card tc"><div class="h"><div><h4>'+esc(t.name)+'</h4>'+
+    return '<div class="card tc"><div class="h"><div><h4>'+esc(teamName(tid))+'</h4>'+
       (t.owner?'<span class="ow">'+esc(t.owner)+'</span>':'')+'</div><span class="sn">Slot '+(slot+1)+'</span></div>'+
       '<div class="slots">'+lu.starters.map(s=>s.player
         ?'<div class="sl"><span class="k">'+s.slot+'</span><span class="v"><span class="pos '+s.player.pos+'">'+lab(s.player.pos)+'</span> '+esc(s.player.name)+'</span><span class="b">'+(s.player.bye||'')+'</span></div>'
@@ -1456,7 +1473,7 @@ function setupView(){
       '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
       '<button class="btn" id="bInvite">Copy the link</button>'+
       '<button class="btn" id="bRoomBlock">Get the ROOM block for this file</button>'+
-      (cm?'':'<button class="btn" id="bTakeover">Take over as commissioner</button>')+
+      '<button class="btn warn" id="bReset">Draft reset</button>'+
       '<button class="btn" id="bLeave">Disconnect</button></div>'+
       (cm?'<div style="margin-top:14px"><label class="fl"><input type="checkbox" id="bLock" '+(S.openPick?'':'checked')+' style="width:auto;margin-right:7px">Only let each manager pick for their own team</label>'+
       '<span style="font-size:12px;color:var(--faint)">Off by default, so whoever is nearest the keyboard can enter any pick. Turn it on and everyone has to choose their team below before they can draft.</span></div>':'')+
@@ -1470,7 +1487,7 @@ function setupView(){
     '<p class="h">Optional. Pick yours and the sidebar tracks your roster, open starting spots and bye weeks as you draft. It does not stop anyone else from picking.</p>'+
     '<div style="max-width:300px"><select id="whoSel">'+
     '<option value="">No team, just following along</option>'+
-    S.order.map((tid,i)=>'<option value="'+tid+'" '+(mt===tid?'selected':'')+'>'+esc(S.teams[tid].name)+' (slot '+(i+1)+')</option>').join('')+
+    S.order.map((tid,i)=>'<option value="'+tid+'" '+(mt===tid?'selected':'')+'>'+esc(teamName(tid))+' (slot '+(i+1)+')</option>').join('')+
     '</select></div></div>' : '';
 
   return '<div class="setup">'+syncBlock+claimBlock+
@@ -1507,7 +1524,7 @@ function setupView(){
       ? (cm?'<button class="btn key" id="bStart">Start the draft</button>':'<span style="font-size:13px;color:var(--dim)">Waiting for the commissioner to start.</span>')
       : '<button class="btn key" id="bBack">Back to the draft</button>'+
         (S.picks.length?'<button class="btn" id="eCSV2">Download results</button>':'')+
-        (cm?'<button class="btn warn" id="bClear">Clear the board</button>':''))+
+        '<button class="btn warn" id="bReset2">Draft reset</button>')+
     '</div></div>'+
 
     '<div class="card sec"><h2>Practice run</h2>'+
@@ -1571,7 +1588,7 @@ function confirmPick(pid){
   const o=atPick(), t=teamAt(o), c=canTake(t,p.pos);
   const lu=lineup(t);
   const clash=lu.starters.filter(s=>s.player&&s.player.bye===p.bye).length;
-  modal('<h3>Pick '+(o+1)+'</h3><p>Round '+roundOf(o)+', slot '+slotOf(o)+', '+esc(S.teams[t].name)+'</p>'+
+  modal('<h3>Pick '+(o+1)+'</h3><p>Round '+roundOf(o)+', slot '+slotOf(o)+', '+esc(teamName(t))+'</p>'+
     '<div class="pcard" style="display:flex;gap:12px;align-items:center">'+avatar(p,'lg')+
     '<div><div class="n">'+esc(p.name)+'</div><div class="m">'+
     '<span class="pos '+p.pos+'">'+lab(p.pos)+'</span> '+esc(p.team)+
@@ -1580,7 +1597,7 @@ function confirmPick(pid){
     (!c.ok?'<p style="color:var(--live);margin-top:12px">'+esc(c.why)+'</p>':'')+
     (c.ok&&clash>=2?'<p style="color:var(--t2);margin-top:12px">Two starters already have bye week '+p.bye+'.</p>':'')+
     '<div class="row"><button class="btn" data-x>Cancel</button>'+
-    '<button class="btn key" id="go" '+(c.ok?'':'disabled')+'>Draft to '+esc(S.teams[t].name)+'</button></div>');
+    '<button class="btn key" id="go" '+(c.ok?'':'disabled')+'>Draft to '+esc(teamName(t))+'</button></div>');
   const g=$('#go'); if(g) g.onclick=()=>{closeM();makePick(pid);};
 }
 
@@ -1767,7 +1784,7 @@ function bind(){
   // board
   $$('[data-ed]').forEach(c=>c.onclick=()=>{
     const o=+c.dataset.ed, pl=playerOf(S.picks[o]);
-    modal('<h3>Pick '+(o+1)+'</h3><p>'+esc(S.teams[teamAt(o)].name)+', round '+roundOf(o)+'</p>'+
+    modal('<h3>Pick '+(o+1)+'</h3><p>'+esc(teamName(teamAt(o)))+', round '+roundOf(o)+'</p>'+
       '<div class="pcard"><div class="n">'+esc(pl.name)+'</div><div class="m">'+lab(pl.pos)+' '+esc(pl.team)+'</div></div>'+
       '<p style="margin-top:14px">Removing this shifts every later pick up one. Use it to fix a wrong name, then redraft from the top.</p>'+
       '<div class="row"><button class="btn" data-x>Leave it</button><button class="btn warn" id="rm">Remove this pick</button></div>');
@@ -1801,17 +1818,35 @@ function bind(){
     S.started=true; view='draft'; saveLocal();
     if(Sync.on) Sync.pushMeta();
     render(); ping(700,.1);
-    toast(S.teams[teamAt(0)].name+' is on the clock');
+    toast(teamName(teamAt(0))+' is on the clock');
   };
   const bb=$('#bBack'); if(bb) bb.onclick=()=>{view='draft';render();};
-  const bcl=$('#bClear'); if(bcl) bcl.onclick=()=>{
-    modal('<h3>Clear the board?</h3><p>Every pick is removed and the draft returns to setup. Team names and order stay.</p>'+
-      '<div class="row"><button class="btn" data-x>Keep it</button><button class="btn warn" id="cg">Clear everything</button></div>');
-    $('#cg').onclick=()=>{
-      S.picks=[]; S.started=false; closeM(); view='setup';
-      if(Sync.on){ Sync.ref.child('picks').remove(); Sync.pushMeta(); } else { saveLocal(); render(); }
+  const doReset=()=>{
+    modal('<h3>Draft reset</h3>'+
+      '<p>This clears every pick and sends the draft back to setup for everyone. '+
+      'Team names, managers and the draft order stay as they are. Enter the reset PIN to continue.</p>'+
+      '<label class="fl">Reset PIN</label>'+
+      '<input type="password" id="rsPin" autocomplete="off" placeholder="PIN">'+
+      '<div id="rsErr" style="color:var(--live);font-size:12.5px;margin-top:8px;display:none">That PIN is not right.</div>'+
+      '<div class="row"><button class="btn" data-x>Cancel</button>'+
+      '<button class="btn warn" id="rsGo">Reset the draft</button></div>');
+    const go=()=>{
+      const v=($('#rsPin').value||'').trim();
+      if(v.toUpperCase()!==RESET_PIN){ $('#rsErr').style.display='block'; $('#rsPin').value=''; $('#rsPin').focus(); return; }
+      closeM();
+      S.picks=[]; S.started=false; view='setup';
+      if(liveSync()){ Sync.ref.child('picks').remove(); Sync.pushMeta(); }
+      else { if(!MOCK.on) saveLocal(); render(); }
+      toast('Draft reset');
     };
+    $('#rsGo').onclick=go;
+    const pin=$('#rsPin');
+    pin.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } };
+    setTimeout(()=>pin.focus(),40);
   };
+  const br1=$('#bReset');  if(br1) br1.onclick=doReset;
+  const br2=$('#bReset2'); if(br2) br2.onclick=doReset;
+
   const bcr=$('#bCreate'); if(bcr) bcr.onclick=()=>{ if(MOCK.on) mockStop(); setupRoomModal(); };
   const bjn=$('#bJoin'); if(bjn) bjn.onclick=joinModal;
   // practice run
@@ -1856,16 +1891,6 @@ function bind(){
   };
 
   const biv=$('#bInvite'); if(biv) biv.onclick=invite;
-  const bto=$('#bTakeover'); if(bto) bto.onclick=()=>{
-    modal('<h3>Take over as commissioner</h3><p>Only do this if you are actually running the draft. It moves the ability to set the order, undo picks and clear the board to this device.</p>'+
-      '<div class="row"><button class="btn" data-x>Cancel</button><button class="btn key" id="toGo">Take over</button></div>');
-    $('#toGo').onclick=()=>{
-      closeM();
-      Sync.ref.child('commish').set(myDevice());
-      put(LS+'_role_'+Sync.room,'commish');
-      toast('You are now the commissioner');
-    };
-  };
   const blv=$('#bLeave'); if(blv) blv.onclick=()=>{ Sync.leave(); toast('Left the room'); render(); };
   const bl=$('#bLock'); if(bl) bl.onchange=e=>{ S.openPick=!e.target.checked; if(Sync.on) Sync.pushMeta(); saveLocal(); render(); };
   const ws=$('#whoSel'); if(ws) ws.onchange=e=>{
@@ -1873,7 +1898,7 @@ function bind(){
     if(v===''){ put(LS+'_myteam',''); if(Sync.on) Sync.setClaim(mt,null); }
     else { put(LS+'_myteam',v); if(Sync.on) Sync.setClaim(+v,{dev:myDevice(),who:S.teams[+v].name}); }
     render();
-    toast(v===''?'Following along':'Tracking '+S.teams[+v].name);
+    toast(v===''?'Following along':'Tracking '+teamName(+v));
   };
   $$('[data-claim]').forEach(b=>b.onclick=()=>{
     const t=+b.dataset.claim;
