@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Draft Room</title>
+<title>NKL Draft Board</title>
 <meta name="theme-color" content="#0C110D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -360,7 +360,7 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 <header>
   <div class="hin">
     <div class="mark">
-      <h1 id="lgName">Draft Room</h1>
+      <h1 id="lgName">NKL Draft Board</h1>
       <div class="fmt" id="lgFmt">10 teams, snake, half PPR</div>
     </div>
     <div class="clockbar">
@@ -857,7 +857,7 @@ function extendPool(all){
 
 function blank(){
   return {
-    league:'Draft Room', rounds:ROSTER,
+    league:'NKL Draft Board', rounds:ROSTER,
     teams:Array.from({length:10},(_,i)=>({name:'Team '+(i+1),owner:''})),
     order:[0,1,2,3,4,5,6,7,8,9],
     picks:[], claims:{}, started:false, poolText:null, openPick:true
@@ -1077,6 +1077,12 @@ function applyRemote(v){
   }
   saveLocal();
   render();
+  /* The room still carries the name it was created with. Rename it once
+     so every device shows the league, not the old placeholder. */
+  if(Sync.on && amCommish() && (!S.league || S.league==='Draft Room')){
+    S.league='NKL Draft Board';
+    Sync.pushMeta();
+  }
 }
 
 function paintSync(){
@@ -1246,7 +1252,7 @@ function dropPick(i){
 const TABS=[{k:'draft',l:'Draft'},{k:'board',l:'Board'},{k:'rosters',l:'Rosters'},{k:'setup',l:'Setup'},{k:'scoring',l:'Scoring'}];
 
 function head(){
-  $('#lgName').textContent = S.league||'Draft Room';
+  $('#lgName').textContent = S.league||'NKL Draft Board';
   $('#lgFmt').textContent = T()+' teams, snake, '+S.rounds+' rounds, half PPR';
   const o=atPick(), otc=$('#otc');
   if(!S.started){
@@ -1372,7 +1378,7 @@ function draftView(){
     : '';
 
   const tk2=takenSet().size + S.picks.filter(p=>p.custom).length;
-  const top='<div class="boardtop"><div><h2>Draft board</h2>'+
+  const top='<div class="boardtop"><div><h2>'+esc(S.league||'NKL Draft Board')+'</h2>'+
     '<div class="sub">Search a name and press Enter, or click a row to draft.</div></div>'+
     '<div class="counts">'+
     '<span class="cpill">'+POOL.length+' total</span>'+
@@ -1772,7 +1778,7 @@ function bind(){
   const e2=$('#eCSV2'); if(e2) e2.onclick=exportCSV;
 
   // setup
-  const sn=$('#sName'); if(sn) sn.oninput=e=>{S.league=e.target.value;$('#lgName').textContent=e.target.value||'Draft Room';saveLocal();};
+  const sn=$('#sName'); if(sn) sn.oninput=e=>{S.league=e.target.value;$('#lgName').textContent=e.target.value||'NKL Draft Board';saveLocal();};
   if(sn) sn.onchange=()=>{ if(Sync.on&&amCommish()) Sync.pushMeta(); };
   const sr=$('#sRounds'); if(sr) sr.onchange=e=>{S.rounds=Math.max(1,Math.min(25,parseInt(e.target.value,10)||ROSTER));saveLocal();if(Sync.on)Sync.pushMeta();render();};
   $$('[data-nm]').forEach(i=>{ i.oninput=e=>{S.teams[+i.dataset.nm].name=e.target.value;saveLocal();head();};
