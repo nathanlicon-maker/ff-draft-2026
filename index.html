@@ -187,11 +187,10 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pr .st.on{color:var(--t3)}
 .pr.no{opacity:.32}
 /* drafted, but still listed so a late search finds them */
-.pr.taken{opacity:.5}
-.pr.taken .nm{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--faint)}
+.pr.taken{opacity:.62}
 .pr.taken .sub{color:var(--live);font-weight:600}
-.pr.taken .av{filter:grayscale(1) opacity(.75)}
-.pr.taken .pos{filter:grayscale(.7)}
+.pr.taken .av{filter:grayscale(1) opacity(.8)}
+.pr.taken .pos{filter:grayscale(.65)}
 .empty{padding:36px 20px;text-align:center;color:var(--faint)}
 
 /* ---------- right rail ---------- */
@@ -339,6 +338,12 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .boardtop{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:16px 0 13px}
 .boardtop h2{font-size:29px;color:var(--head);text-transform:uppercase;letter-spacing:.005em;line-height:1}
 .boardtop .sub{font-size:13.5px;color:var(--dim);margin-top:5px}
+.draft-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 13px}
+.ctl-state{
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;
+  border:1px solid var(--line);color:var(--faint);background:var(--p1);
+}
+.ctl-state.on{border-color:transparent;background:var(--pill-live-bg);color:var(--pill-live-tx)}
 
 
 /* ---------- duck race ---------- */
@@ -1692,12 +1697,21 @@ function draftView(){
     : '';
 
   const tk2=takenSet().size + S.picks.filter(p=>p.custom).length;
+  const cm=amCommish();
+  const ctrl = cm
+    ? '<div class="draft-ctl">'+
+        '<button class="btn key" id="dStart" '+(S.started&&!over()?'disabled':'')+'>Draft start</button>'+
+        '<button class="btn warn" id="dStop" '+(S.started?'':'disabled')+'>Draft stop</button>'+
+        '<span class="ctl-state '+(S.started&&!over()?'on':'')+'">'+
+          (over()?'Draft complete':(S.started?'Running':'Stopped'))+'</span>'+
+      '</div>'
+    : '';
   const top='<div class="boardtop"><div><h2>'+esc(S.league||'NKL Draft Board')+'</h2>'+
     '<div class="sub">Search a name and press Enter, or click a row to draft.</div></div>'+
     '<div class="counts">'+
     '<span class="cpill">'+POOL.length+' total</span>'+
     '<span class="cpill live">'+(POOL.length-takenSet().size)+' available</span>'+
-    '<span class="cpill">'+S.picks.length+' drafted</span></div></div>';
+    '<span class="cpill">'+S.picks.length+' drafted</span></div></div>'+ctrl;
 
   return top+ticker()+mockBar+'<div class="dgrid"><section>'+
     (turn?'<div class="note" style="margin-bottom:11px">Waiting on '+esc(teamName(teamAt(o)))+'. You will be able to pick when your turn comes.</div>':'')+
@@ -2004,6 +2018,12 @@ function confirmPick(pid){
     return;
   }
 
+  if(!S.started){
+    modal('<h3>The draft is not running</h3>'+
+      '<p>Nobody can pick until the commissioner presses Draft start.</p>'+
+      '<div class="row"><button class="btn key" data-x>Close</button></div>');
+    return;
+  }
   const o=atPick(), t=teamAt(o), c=canTake(t,p.pos);
   const lu=lineup(t);
   const clash=lu.starters.filter(s=>s.player&&s.player.bye===p.bye).length;
@@ -2231,6 +2251,27 @@ function bind(){
   }
   $$('[data-f]').forEach(b=>b.onclick=()=>{filterPos=b.dataset.f;selIdx=0;render();});
   const bc=$('#bCustom'); if(bc) bc.onclick=customModal;
+  const ds=$('#dStart'); if(ds) ds.onclick=()=>{
+    if(S.started && !over()){ toast('Already running',1); return; }
+    S.started=true;
+    if(liveSync()) Sync.pushMeta(); else saveLocal();
+    render(); ping(700,.1);
+    toast('Draft started, '+teamName(teamAt(atPick()))+' is up');
+  };
+  const dp=$('#dStop'); if(dp) dp.onclick=()=>{
+    if(!S.started){ toast('Not running',1); return; }
+    modal('<h3>Stop the draft?</h3>'+
+      '<p>Picking pauses on every device. Nothing already picked is lost, and you can start again whenever you like.</p>'+
+      '<div class="row"><button class="btn" data-x>Keep drafting</button>'+
+      '<button class="btn warn" id="dsGo">Stop the draft</button></div>');
+    $('#dsGo').onclick=()=>{
+      closeM();
+      S.started=false;
+      if(liveSync()) Sync.pushMeta(); else saveLocal();
+      render(); ping(320,.2,.07);
+      toast('Draft stopped');
+    };
+  };
   bindRows();
 
   // board
@@ -2287,9 +2328,17 @@ function bind(){
       if(v.toUpperCase()!==RESET_PIN){ $('#rsErr').style.display='block'; $('#rsPin').value=''; $('#rsPin').focus(); return; }
       closeM();
       S.picks=[]; S.started=false; view='setup';
-      if(liveSync()){ Sync.ref.child('picks').remove(); Sync.pushMeta(); }
+      /* One write. Clearing the picks separately would trigger a read-back
+         carrying the old started flag, which would switch the draft straight
+         back on. */
+      if(liveSync()){
+        Sync.ref.update({
+          meta:{league:S.league,rounds:S.rounds,started:false,openPick:!!S.openPick},
+          teams:S.teams, order:S.order, picks:null
+        });
+      }
       else { if(!MOCK.on) saveLocal(); render(); }
-      toast('Draft reset');
+      toast('Draft reset, everything back to the start');
     };
     $('#rsGo').onclick=go;
     const pin=$('#rsPin');
