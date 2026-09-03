@@ -186,11 +186,14 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .pr:hover .st,.pr .st.on{opacity:1}
 .pr .st.on{color:var(--t3)}
 .pr.no{opacity:.32}
-/* drafted, but still listed so a late search finds them */
-.pr.taken{opacity:.62}
-.pr.taken .sub{color:var(--live);font-weight:600}
-.pr.taken .av{filter:grayscale(1) opacity(.8)}
-.pr.taken .pos{filter:grayscale(.65)}
+/* drafted, but still listed in place so a late search finds them */
+.pr.taken{background:var(--p2)}
+.pr.taken .nm{color:var(--faint)}
+.pr.taken .sub{color:var(--dim);font-weight:600}
+.pr.taken .av{filter:grayscale(1);opacity:.55}
+.pr.taken .pos{filter:grayscale(1);opacity:.6}
+.pr.taken .by{color:var(--faint)}
+.pr.taken:hover{background:var(--p3)}
 .empty{padding:36px 20px;text-align:center;color:var(--faint)}
 
 /* ---------- right rail ---------- */
@@ -1041,18 +1044,24 @@ const atPick = () => S.picks.length;
 const over = () => atPick() >= totalPicks();
 const code = o => roundOf(o)+'.'+String(slotOf(o)).padStart(2,'0');
 
-/* The reigning champion gets a crown. It is decoration only, added when
-   a name is drawn, never stored, so editing the team name or the manager
-   cannot break it and the crown never ends up in the export. */
-const CHAMP_MANAGER = 'nate';
-function isChamp(teamId){
+/* Last season's bookends. Both are decoration, added when a name is
+   drawn and never stored, so editing a team or manager cannot break
+   them and neither ends up in the CSV export. */
+const CHAMP_MANAGER = 'nate';     // reigning champion
+const LAST_MANAGER  = 'kyler';    // finished last
+function managerIs(teamId, who){
   const t=S.teams[teamId];
-  return !!(t && String(t.owner||'').trim().toLowerCase()===CHAMP_MANAGER);
+  return !!(t && String(t.owner||'').trim().toLowerCase()===who);
 }
+function isChamp(teamId){ return managerIs(teamId, CHAMP_MANAGER); }
+function isLast(teamId){ return managerIs(teamId, LAST_MANAGER); }
 function teamName(teamId){
   const t=S.teams[teamId];
   if(!t) return '';
-  return (isChamp(teamId)?'\u265B ':'')+t.name;
+  let badge='';
+  if(isChamp(teamId)) badge='\u265B ';
+  else if(isLast(teamId)) badge='\u{1F4A9} ';
+  return badge+t.name;
 }
 
 /* ---------- 6. DERIVED ---------- */
@@ -1607,11 +1616,9 @@ function poolRows(){
     if(q && !(p.name+' '+p.team+' '+lab(p.pos)).toLowerCase().includes(q)) return false;
     return true;
   });
-  /* Alphabetical, so the order of the list gives nothing away either.
-     Available names sort above ones already taken. */
+  /* Straight alphabetical. Drafted players hold their place in the list
+     and simply go grey, so a name is always where you expect it. */
   list.sort((a,c)=>{
-    const ga=tk.has(a.id)?1:0, gc=tk.has(c.id)?1:0;
-    if(ga!==gc) return ga-gc;
     const an=a.name.replace(/^[^A-Za-z]+/,''), cn=c.name.replace(/^[^A-Za-z]+/,'');
     return an.localeCompare(cn);
   });
