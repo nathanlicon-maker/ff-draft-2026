@@ -674,6 +674,14 @@ const TEAMLOGO = t => 'https://a.espncdn.com/i/teamlogos/nfl/500/'+String(t||'')
 const HEADSHOT = id => 'https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
 
 function keyName(n){ return String(n||'').toLowerCase().replace(/[^a-z]/g,''); }
+/* "Aaron Jones" and "Aaron Jones Sr." are one person, and the two sources
+   disagree about the suffix on roughly fifteen players. Ignore the suffix
+   when deciding whether two names refer to the same man. */
+function baseName(n){
+  return String(n||'').toLowerCase()
+    .replace(/\b(jr|sr|ii|iii|iv)\b\.?/g,'')
+    .replace(/[^a-z]/g,'');
+}
 /* A looser key for when the two sources spell a name differently:
    first initial plus surname, with suffixes dropped. */
 function altKey(n,pos){
@@ -702,7 +710,7 @@ function avatar(pl, size){
       '<img class="logo" src="'+TEAMLOGO(pl.team)+'" alt="" loading="lazy" style="position:absolute;inset:0" '+
       'onerror="this.remove()">'+'</span>';
   }
-  const id = HEAD[keyName(pl.name)];
+  const id = HEAD[baseName(pl.name)];
   if(id){
     return '<span class="'+cls+'">'+mono+
       '<img src="'+HEADSHOT(id)+'" alt="" loading="lazy" style="position:absolute;inset:0" '+
@@ -717,7 +725,7 @@ function avatar(pl, size){
    of the league. Cached afterwards, so it only happens once per device. */
 function loadRoster(){
   try{
-    const cached=get(LS+'_roster2');
+    const cached=get(LS+'_roster3');
     if(cached){
       const c=JSON.parse(cached);
       Object.assign(HEAD,c.h||{});
@@ -727,7 +735,7 @@ function loadRoster(){
     }
   }catch(e){}
   reindexPool();
-  try{ localStorage.removeItem(LS+'_roster'); localStorage.removeItem(LS+'_heads'); }catch(e){}
+  try{ localStorage.removeItem(LS+'_roster'); localStorage.removeItem(LS+'_roster2'); localStorage.removeItem(LS+'_heads'); }catch(e){}
   if(typeof fetch!=='function') return;
   fetch('https://api.sleeper.app/v1/players/nfl').then(r=>r.json()).then(all=>{
     const before=POOL.length;
@@ -735,7 +743,7 @@ function loadRoster(){
     headsReady=true;
     try{
       const x=POOL.slice(before).map(p=>[p.name,p.pos,p.team,p.bye]);
-      put(LS+'_roster2', JSON.stringify({h:HEAD, x:x}));
+      put(LS+'_roster3', JSON.stringify({h:HEAD, x:x}));
     }catch(e){}
     render();
     toast(POOL.length+' players available');
@@ -790,7 +798,7 @@ let poolExtended = false;
    differently ("Denver D/ST" vs "DEN D/ST"), so match those on the team
    instead of the name or every defense lands on the board twice. */
 function dkey(pos,name,team){
-  return pos==='DST' ? ('DST|'+(team||'')) : (keyName(name)+'|'+pos);
+  return pos==='DST' ? ('DST|'+(team||'')) : (baseName(name)+'|'+pos);
 }
 function reindexPool(){
   const c={};
@@ -826,7 +834,7 @@ function extendPool(all){
     const k=dkey(pos,name,s.team);
     if(have[k]){
       // already on the ranked core — we still want the face
-      if(pos!=='DST' && !HEAD[keyName(name)]) HEAD[keyName(name)]=id;
+      if(pos!=='DST' && !HEAD[baseName(name)]) HEAD[baseName(name)]=id;
       return;
     }
     have[k]=1;
@@ -840,16 +848,16 @@ function extendPool(all){
   // most fantasy-relevant first, then alphabetical so every device agrees
   extra.sort((x,y)=> x._rk!==y._rk ? x._rk-y._rk : (x.name<y.name?-1:1));
   extra.forEach(e=>{
-    if(e._id && e.pos!=='DST') HEAD[keyName(e.name)]=e._id;
+    if(e._id && e.pos!=='DST') HEAD[baseName(e.name)]=e._id;
     POOL.push({name:e.name,pos:e.pos,team:e.team,bye:e.bye});
   });
   // second pass for names the two sources spell differently, such as
   // "J. Croskey-Merriweather" against "Jacory Croskey-Merriweather"
   POOL.forEach(p=>{
     if(p.pos==='DST') return;
-    if(HEAD[keyName(p.name)]) return;
+    if(HEAD[baseName(p.name)]) return;
     const a=altKey(p.name,p.pos);
-    if(a && alt[a]) HEAD[keyName(p.name)]=alt[a];
+    if(a && alt[a]) HEAD[baseName(p.name)]=alt[a];
   });
   reindexPool();
   poolExtended=true;
@@ -1322,12 +1330,9 @@ function poolRows(){
     if(q && !(p.name+' '+p.team+' '+lab(p.pos)).toLowerCase().includes(q)) return false;
     return true;
   });
-  /* Alphabetical on purpose. Sorting by a consensus ranking would hand
-     everyone a cheat sheet, which is exactly what we are avoiding. */
-  list.sort((a,c)=>{
-    const an=a.name.replace(/^[^A-Za-z]+/,''), cn=c.name.replace(/^[^A-Za-z]+/,'');
-    return an.localeCompare(cn);
-  });
+  /* Ordered by ADP, but the number is never shown. The board still puts
+     the likely picks near the top; it just will not tell anyone by how
+     much, so you cannot read a ranking off the screen. */
   if(selIdx>=list.length) selIdx=0;
   if(!list.length) return {html:'<div class="empty">Nobody matches that search.</div>',list:list};
   const mt = myTeam();
@@ -1405,7 +1410,7 @@ function draftView(){
 
   const tk2=takenSet().size + S.picks.filter(p=>p.custom).length;
   const top='<div class="boardtop"><div><h2>Draft board</h2>'+
-    '<div class="sub">Alphabetical, no rankings. Search a name and press Enter, or click a row to draft.</div></div>'+
+    '<div class="sub">Search a name and press Enter, or click a row to draft.</div></div>'+
     '<div class="counts">'+
     '<span class="cpill">'+POOL.length+' total</span>'+
     '<span class="cpill live">'+(POOL.length-takenSet().size)+' available</span>'+
@@ -1523,7 +1528,7 @@ function setupView(){
     '<button class="btn" id="bSub" '+(locked?'disabled':'')+'>Remove a team</button></div>':'')+
     (locked?'<p class="h" style="margin-top:11px;color:var(--t2)">Picks are in, so the order is locked. Names can still change.</p>':'')+'</div>'+
 
-    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players available'+(poolExtended?', every skill-position player on an NFL roster':' — the wider list is still loading')+'. The list is alphabetical and carries no rankings or projections, so come prepared with your own board.</p>'+
+    '<div class="card sec"><h2>Player pool</h2><p class="h">'+POOL.length+' players available'+(poolExtended?', every skill-position player on an NFL roster':' — the wider list is still loading')+'. No rankings, projections or tiers are shown, so come with your own board.</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="bImport">Import rankings</button>'+
     '<button class="btn" id="bPoolReset">Restore the built-in list</button></div></div>'+
 
