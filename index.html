@@ -341,9 +341,9 @@ a.btn{text-decoration:none}
 .donate:hover{background:#2E86DE;color:#fff;border-color:#2E86DE}
 .donate .dn-i{
   display:inline-flex;align-items:center;justify-content:center;
-  width:16px;height:16px;border-radius:50%;background:currentColor;color:var(--p1);
-  font-size:11px;font-weight:800;line-height:1;
+  font-size:14px;line-height:1;
 }
+.donate:hover .dn-i{filter:brightness(1.05)}
 /* count pills, as on the reference board */
 .counts{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
 .cpill{font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:99px;border:1px solid var(--line);background:var(--p1);color:var(--dim)}
@@ -486,6 +486,7 @@ a.btn{text-decoration:none}
   .hact{gap:6px}
   .donate .dn-t{display:none}
   .donate{padding:8px 10px}
+  .donate .dn-i{font-size:16px}
   nav{padding:0 10px}
   nav button{font-size:13px;padding:11px 11px}
 
@@ -557,7 +558,7 @@ a.btn{text-decoration:none}
       <button class="btn sm gh" id="bUndo">Undo</button>
       <a class="btn sm donate" href="https://venmo.com/u/NathanLicon" target="_blank" rel="noopener noreferrer"
          title="Chip in for the trophy on Venmo">
-        <span class="dn-i" aria-hidden="true">$</span><span class="dn-t">Donate</span>
+        <span class="dn-i" aria-hidden="true">🙏</span><span class="dn-t">Donate</span>
       </a>
     </div>
   </div>
