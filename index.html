@@ -334,6 +334,16 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
 .gradecard{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--p2);margin-bottom:7px}
 .gradecard .g{font-family:var(--disp);font-weight:800;font-size:27px;text-align:center;line-height:1}
 .themebtn{font-size:15px;line-height:1;padding:8px 11px}
+a.btn{text-decoration:none}
+.donate{
+  border-color:#2E86DE;color:#2E86DE;background:transparent;font-weight:700;gap:5px;
+}
+.donate:hover{background:#2E86DE;color:#fff;border-color:#2E86DE}
+.donate .dn-i{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;background:currentColor;color:var(--p1);
+  font-size:11px;font-weight:800;line-height:1;
+}
 /* count pills, as on the reference board */
 .counts{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
 .cpill{font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:99px;border:1px solid var(--line);background:var(--p1);color:var(--dim)}
@@ -474,6 +484,8 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
   .mark h1{font-size:16px}
   .mark .fmt{display:none}
   .hact{gap:6px}
+  .donate .dn-t{display:none}
+  .donate{padding:8px 10px}
   nav{padding:0 10px}
   nav button{font-size:13px;padding:11px 11px}
 
@@ -543,6 +555,10 @@ nav .n{font-size:11px;color:var(--faint);margin-left:5px}
       <span class="sync" id="syncPill"><span class="d"></span><span id="syncTxt">Local</span></span>
       <button class="btn sm gh themebtn" id="bTheme" title="Switch between light and dark">◐</button>
       <button class="btn sm gh" id="bUndo">Undo</button>
+      <a class="btn sm donate" href="https://venmo.com/u/NathanLicon" target="_blank" rel="noopener noreferrer"
+         title="Chip in for the trophy on Venmo">
+        <span class="dn-i" aria-hidden="true">$</span><span class="dn-t">Donate</span>
+      </a>
     </div>
   </div>
   <nav id="nav"></nav>
